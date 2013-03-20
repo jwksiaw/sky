@@ -85,8 +85,8 @@
       g: function (attrs, props) {
         return this.child('g', attrs, props);
       },
-      link: function (href) {
-        return this.child('a').attrs({href: href}, this.xlink);
+      link: function (href, xattrs) {
+        return this.child('a').attrs(util.update({href: href}, xattrs), this.xlink);
       },
       fit: function () {
         var svg = this.node.tagName == 'svg' ? this : new SVGElem(this.node.ownerSVGElement);
