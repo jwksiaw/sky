@@ -36,9 +36,9 @@
           node.removeChild(node.firstChild);
         return this;
       },
-      attrs: function (attrs) {
+      attrs: function (attrs, ns) {
         for (var k in attrs)
-          this.node.setAttribute(k, attrs[k]);
+          this.node.setAttributeNS(ns || null, k, attrs[k]);
         return this;
       },
       props: function (props) {
@@ -54,6 +54,7 @@
   SVGElem.prototype = new Elem().update({
       constructor: SVGElem,
       xmlns: "http://www.w3.org/2000/svg",
+      xlink: "http://www.w3.org/1999/xlink",
       ellipse: function (cx, cy, rx, ry) {
         return this.child('ellipse', {cx: cx, cy: cy, rx: rx, ry: ry});
       },
@@ -83,6 +84,9 @@
       },
       g: function (attrs, props) {
         return this.child('g', attrs, props);
+      },
+      link: function (href) {
+        return this.child('a').attrs({href: href}, this.xlink);
       },
       fit: function () {
         var svg = this.node.tagName == 'svg' ? this : new SVGElem(this.node.ownerSVGElement);
