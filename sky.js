@@ -1,18 +1,26 @@
 (function () {
   var util = {
     mix: function (x, opts) {
-      var o = util.update({min: 0, max: 100, lo: {b: 100}, hi: {r: 100}}, opts);
+      var o = util.update({min: 0, max: 100, lo: {b: 100, a: 1}, hi: {r: 100, a: 1}}, opts);
       var m = o.min, M = o.max, lo = o.lo, hi = o.hi;
-      function w(a, b) {
-        return Math.round(((b || 0) * Math.max(x - m, 0) + (a || 0) * Math.max(M - x, 0)) / (M - m));
-      }
-      return {r: w(lo.r, hi.r), g: w(lo.g, hi.g), b: w(lo.b, hi.b)};
+      function w(a, b) { return ((b || 0) * Math.max(x - m, 0) + (a || 0) * Math.max(M - x, 0)) / (M - m) }
+      function i(a, b) { return Math.round(w(a, b)) };
+      return new RGB({r: i(lo.r, hi.r), g: i(lo.g, hi.g), b: i(lo.b, hi.b), a: w(lo.a, hi.a)});
     },
     update: function (a, b) {
       for (var k in b)
         a[k] = b[k];
       return a;
     }
+  };
+
+  function RGB(data) {
+    Sky.util.update(this, data);
+  }
+  RGB.prototype.toString = function () {
+    if ('a' in this)
+      return 'rgba(' + (this.r || 0) + ',' + (this.g || 0) + ',' + (this.b || 0) + ',' + this.a + ')';
+    return 'rgb(' + (this.r || 0) + ',' + (this.g || 0) + ',' + (this.b || 0) + ')';
   };
 
   function Elem(elem, attrs, props) {
@@ -96,6 +104,7 @@
     });
 
   Sky = {
+    RGB: RGB,
     util: util,
     Elem: Elem,
     SVGElem: SVGElem,
