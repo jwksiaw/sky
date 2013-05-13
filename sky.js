@@ -93,6 +93,9 @@
       g: function (attrs, props) {
         return this.child('g', attrs, props);
       },
+      image: function (x, y, w, h, href, xattrs) {
+        return this.child('image').attrs(util.update({href: href}, xattrs), this.xlink).attrs({x: x, y: y, width: w, height: h});
+      },
       link: function (href, xattrs) {
         return this.child('a').attrs(util.update({href: href}, xattrs), this.xlink);
       },
