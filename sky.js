@@ -53,6 +53,10 @@
         for (var k in props)
           this.node[k] = props[k];
         return this;
+      },
+      remove: function () {
+        this.node.parentNode.removeChild(this.node);
+        return this;
       }
     });
 
