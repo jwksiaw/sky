@@ -15,6 +15,9 @@
     int: function (x) {
       return parseInt(x, 10);
     },
+    mod: function (x, y) {
+      return x < 0 ? x % y + y : x % y;
+    },
     pad: function (s, opt) {
       var s = s + '', w = opt && opt.width || 2, p = opt && opt.pad || '0';
       while (s.length < w)
