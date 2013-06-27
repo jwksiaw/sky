@@ -1,4 +1,5 @@
 (function () {
+  var anim = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame;
   var util = {
     mix: function (x, opts) {
       var o = util.update({min: 0, max: 100, lo: {b: 100, a: 1}, hi: {r: 100, a: 1}}, opts);
@@ -52,6 +53,14 @@
       props: function (props) {
         for (var k in props)
           this.node[k] = props[k];
+        return this;
+      },
+      animate: function (fun) {
+        var self = this, i = 0;
+        anim(function () {
+            if (fun.call(self, self.node, i++))
+              anim(arguments.callee);
+          });
         return this;
       },
       remove: function () {
