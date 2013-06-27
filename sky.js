@@ -66,6 +66,20 @@
       remove: function () {
         this.node.parentNode.removeChild(this.node);
         return this;
+      },
+      on: function (types, fun, capture) {
+        var node = this.node;
+        types.split(/\s+/).map(function (type) {
+            node.addEventListener(type, fun, capture);
+          });
+        return this;
+      },
+      off: function (types, fun, capture) {
+        var node = this.node;
+        types.split(/\s+/).map(function (type) {
+            node.removeEventListener(type, fun, capture);
+          });
+        return this;
       }
     });
 
