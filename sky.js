@@ -130,6 +130,12 @@
         var svg = this.node.tagName == 'svg' ? this : new SVGElem(this.node.ownerSVGElement);
         var box = this.node.getBBox();
         return svg.attrs({viewBox: [box.x, box.y, box.width, box.height]});
+      },
+      transform: function (desc) {
+        var xform = [];
+        for (var k in desc)
+          xform.push(k + '(' + [].concat(desc[k]).join(',') + ')');
+        return this.attrs({transform: xform.join(' ')});
       }
     });
 
