@@ -131,6 +131,13 @@
         var box = this.node.getBBox();
         return svg.attrs({viewBox: [box.x, box.y, box.width, box.height]});
       },
+      point: function (x, y) {
+        var svg = this.node.tagName == 'svg' ? this : new SVGElem(this.node.ownerSVGElement);
+        var p = svg.node.createSVGPoint();
+        p.x = x;
+        p.y = y;
+        return p;
+      },
       transform: function (desc) {
         var xform = [];
         for (var k in desc)

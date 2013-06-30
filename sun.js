@@ -24,6 +24,11 @@
       while (s.length < w)
         s = p + s;
       return s;
+    },
+    repeat: function (fun, every) {
+      return setTimeout(function () {
+          fun() || setTimeout(arguments.callee, every);
+        }, every);
     }
   };
 })();
