@@ -26,7 +26,7 @@
       return s;
     },
     repeat: function (fun, every) {
-      return setTimeout(function () {
+      return fun() || setTimeout(function () {
           fun() || setTimeout(arguments.callee, every);
         }, every);
     }
