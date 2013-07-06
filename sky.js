@@ -55,6 +55,11 @@
           this.node[k] = props[k];
         return this;
       },
+      style: function (attrs) {
+        for (var k in attrs)
+          this.node.style[k] = attrs[k];
+        return this;
+      },
       animate: function (fun) {
         var self = this, i = 0;
         anim(function () {
@@ -79,6 +84,10 @@
         types.split(/\s+/).map(function (type) {
             node.removeEventListener(type, fun, capture);
           });
+        return this;
+      },
+      trigger: function (type, data) {
+        this.node.dispatchEvent(new CustomEvent(type, {detail: data}));
         return this;
       }
     });
@@ -151,6 +160,9 @@
     util: util,
     Elem: Elem,
     SVGElem: SVGElem,
+    elem: function (elem, attrs, props) {
+      return new Elem(elem, attrs, props);
+    },
     svg: function (attrs, props) {
       return new SVGElem('svg', util.update({version: "1.1"}, attrs), props);
     }
