@@ -135,6 +135,9 @@
       link: function (href, xattrs) {
         return this.child('a').attrs(util.update({href: href}, xattrs), this.xlink);
       },
+      use: function (href, xattrs) {
+        return this.child('use').attrs(util.update({href: href}, xattrs), this.xlink);
+      },
       fit: function () {
         var svg = this.node.tagName == 'svg' ? this : new SVGElem(this.node.ownerSVGElement);
         var box = this.node.getBBox();
