@@ -138,15 +138,18 @@
       use: function (href, xattrs) {
         return this.child('use').attrs(util.update({href: href}, xattrs), this.xlink);
       },
-      svg: function () {
+      svg: function (x, y, w, h) {
+        return this.child('svg', {x: x, y: y, width: w, height: h});
+      },
+      svge: function () {
         return this.node.tagName == 'svg' ? this : new SVGElem(this.node.ownerSVGElement);
       },
       fit: function () {
         var box = this.node.getBBox();
-        return this.svg().attrs({viewBox: [box.x, box.y, box.width, box.height]});
+        return this.svge().attrs({viewBox: [box.x, box.y, box.width, box.height]});
       },
       point: function (x, y) {
-        var p = this.svg().node.createSVGPoint();
+        var p = this.svge().node.createSVGPoint();
         p.x = x;
         p.y = y;
         return p;
