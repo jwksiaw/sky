@@ -2,10 +2,12 @@
   var anim = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame;
   var util = {
     mix: function (x, opts) {
-      var o = util.update({min: 0, max: 100, lo: {b: 100, a: 1}, hi: {r: 100, a: 1}}, opts);
+      var o = util.update({min: 0, max: 100, lo: {b: 100}, hi: {r: 100}}, opts);
       var m = o.min, M = o.max, lo = o.lo, hi = o.hi;
       function w(a, b) { return ((b || 0) * Math.max(x - m, 0) + (a || 0) * Math.max(M - x, 0)) / (M - m) }
       function i(a, b) { return Math.round(w(a, b)) };
+      if (lo.a == undefined && hi.a == undefined)
+        return new RGB({r: i(lo.r, hi.r), g: i(lo.g, hi.g), b: i(lo.b, hi.b)});
       return new RGB({r: i(lo.r, hi.r), g: i(lo.g, hi.g), b: i(lo.b, hi.b), a: w(lo.a, hi.a)});
     },
     update: function (a, b) {
