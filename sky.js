@@ -91,6 +91,9 @@
       trigger: function (type, data) {
         this.node.dispatchEvent(new CustomEvent(type, {detail: data}));
         return this;
+      },
+      txt: function (text) {
+        return this.props({textContent: text});
       }
     });
 
