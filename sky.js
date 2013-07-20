@@ -62,10 +62,10 @@
           this.node.style[k] = attrs[k];
         return this;
       },
-      animate: function (fun) {
+      animate: function (fun, n) {
         var self = this, i = 0;
         anim(function () {
-            if (fun.call(self, self.node, i++))
+            if (fun.call(self, self.node, i++) || i < n)
               anim(arguments.callee);
           });
         return this;
