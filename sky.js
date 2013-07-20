@@ -92,6 +92,9 @@
         this.node.dispatchEvent(new CustomEvent(type, {detail: data}));
         return this;
       },
+      doc: function () {
+        return this.node instanceof Document ? this : new Elem(this.node.ownerDocument);
+      },
       txt: function (text) {
         return this.props({textContent: text});
       }
@@ -146,15 +149,15 @@
       svg: function (x, y, w, h) {
         return this.child('svg', {x: x, y: y, width: w, height: h});
       },
-      svge: function () {
+      enc: function () {
         return this.node.tagName == 'svg' ? this : new SVGElem(this.node.ownerSVGElement);
       },
       fit: function () {
         var box = this.node.getBBox();
-        return this.svge().attrs({viewBox: [box.x, box.y, box.width, box.height]});
+        return this.enc().attrs({viewBox: [box.x, box.y, box.width, box.height]});
       },
       point: function (x, y) {
-        var p = this.svge().node.createSVGPoint();
+        var p = this.enc().node.createSVGPoint();
         p.x = x;
         p.y = y;
         return p;
