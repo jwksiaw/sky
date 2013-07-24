@@ -68,8 +68,6 @@
       var self = this;
       var dims = [x, y, w, h];
       this.attrs({viewBox: dims});
-      xmax = Math.max(xmin, xmax);
-      ymax = Math.max(ymin, ymax);
       return function (dx, dy) {
         dims[0] = clip(dims[0] - dx, xmin, xmax);
         dims[1] = clip(dims[1] - dy, ymin, ymax);
