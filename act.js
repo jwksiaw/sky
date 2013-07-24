@@ -10,7 +10,7 @@
         });
       return this;
     },
-    swipe: function (fun, glob) {
+    swipe: function (fun, glob, stop) {
       var swipe, lx, ly;
       var doc = this.doc(), that = glob ? doc : this;
       this.on('mousedown touchstart', function (e) {
@@ -23,6 +23,8 @@
             fun(e.pageX - lx, e.pageY - ly, lx, ly, e.pageX, e.pageY);
             lx = e.pageX;
             ly = e.pageY;
+            if (stop)
+              e.stopImmediatePropagation();
             e.preventDefault();
           }
         });
@@ -66,6 +68,8 @@
       var self = this;
       var dims = [x, y, w, h];
       this.attrs({viewBox: dims});
+      xmax = Math.max(xmin, xmax);
+      ymax = Math.max(ymin, ymax);
       return function (dx, dy) {
         dims[0] = clip(dims[0] - dx, xmin, xmax);
         dims[1] = clip(dims[1] - dy, ymin, ymax);
