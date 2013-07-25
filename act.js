@@ -40,7 +40,7 @@
           if (my > 1) dy /= ky || 32;
           this.dx -= dx;
           this.dy -= dy;
-          restore(dx, dy);
+          restore.call(this, dx, dy);
         });
     },
     spring: function (restore) {
@@ -73,7 +73,7 @@
         dims[1] = clip(dims[1] - dy, ymin, ymax);
         fun && fun.apply(self, dims);
         return self.attrs({viewBox: dims});
-        };
+      };
     },
     track: function (bbox, fun) {
       var cbox = this.node.getBBox();
