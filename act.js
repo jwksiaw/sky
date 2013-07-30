@@ -52,7 +52,7 @@
         if (equilibrium)
           self.animate(function () {
               var dx = spring.dx, dy = spring.dy;
-              return restore.call(spring, dx, dy, Math.abs(dx), Math.abs(dy)) || dx || dy;
+              return restore.call(spring, dx, dy, Math.abs(dx), Math.abs(dy)) || spring.dx || spring.dy;
             });
       };
       spring.dx = 0;
