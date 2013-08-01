@@ -34,7 +34,7 @@
         });
       doc.on('mouseup touchend', function () {
           if (swipe)
-            opts.release && opts.release();
+            opts.free && opts.free();
           swipe = false;
         });
       return this;
