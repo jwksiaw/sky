@@ -10,10 +10,14 @@
         });
       return this;
     },
-    swipe: function (fun, glob, stop) {
+    swipe: function (fun, opts) {
+      var opts = Sky.util.update({glob: true}, opts);
+      var glob = opts.glob, stop = opts.stop;
       var swipe, lx, ly;
       var doc = this.doc(), that = glob ? doc : this;
       this.on('mousedown touchstart', function (e) {
+          if (!swipe)
+            opts.grab && opts.grab();
           swipe = true;
           lx = e.pageX;
           ly = e.pageY;
@@ -29,6 +33,8 @@
           }
         });
       doc.on('mouseup touchend', function () {
+          if (swipe)
+            opts.release && opts.release();
           swipe = false;
         });
       return this;
