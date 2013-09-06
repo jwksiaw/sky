@@ -16,17 +16,19 @@
       var swipe, lx, ly;
       var doc = this.doc(), that = glob ? doc : this;
       this.on('mousedown touchstart', function (e) {
+          var t = e.touches ? e.touches[0] : e;
           if (!swipe)
             opts.grab && opts.grab();
           swipe = true;
-          lx = e.pageX;
-          ly = e.pageY;
+          lx = t.pageX;
+          ly = t.pageY;
         });
       that.on('mousemove touchmove', function (e) {
           if (swipe) {
-            fun(e.pageX - lx, e.pageY - ly, lx, ly, e.pageX, e.pageY);
-            lx = e.pageX;
-            ly = e.pageY;
+            var t = e.touches ? e.touches[0] : e;
+            fun(t.pageX - lx, t.pageY - ly, lx, ly, t.pageX, t.pageY);
+            lx = t.pageX;
+            ly = t.pageY;
             if (stop)
               e.stopImmediatePropagation();
             e.preventDefault();
