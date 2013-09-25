@@ -1,16 +1,16 @@
 (function () {
   Sun = {
     groupby: function (list, key) {
-      var k, key = key || function (item) { return item[0] };
+      var k, key = key || function (item) { return item[0] }
       return list.reduce(function (acc, item) {
-          var k_ = key(item);
-          if (k_ == k)
-            acc[acc.length - 1][1].push(item);
-          else
-            acc.push([k_, [item]]);
-          k = k_;
-          return acc;
-        }, []);
+        var k_ = key(item);
+        if (k_ == k)
+          acc[acc.length - 1][1].push(item);
+        else
+          acc.push([k_, [item]]);
+        k = k_;
+        return acc;
+      }, []);
     },
     int: function (x) {
       return parseInt(x, 10);
@@ -27,8 +27,8 @@
     },
     repeat: function (fun, every) {
       return fun() || setTimeout(function () {
-          fun() || setTimeout(arguments.callee, every);
-        }, every);
+        fun() || setTimeout(arguments.callee, every);
+      }, every);
     }
-  };
+  }
 })();
