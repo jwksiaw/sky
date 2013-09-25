@@ -97,6 +97,15 @@
     get midY() { return this.y + this.h / 2 },
     get right() { return this.x + this.w },
     get bottom() { return this.y + this.h },
+    grid: function (fun, acc, opts) {
+      var o = update({rows: 1, cols: 1}, opts);
+      var r = o.rows, c = o.cols;
+      var x = this.x, y = this.y, w = this.w / c, h = this.h / r;
+      for (var i = 0, n = 0; i < r; i++)
+        for (var j = 0; j < c; j++, n++)
+          acc = fun(acc, new Box({x: x + w * j, y: y + h * i, w: w, h: h}), i, j, n, this);
+      return acc;
+    },
     toString: function () { return this.x + ',' + this.y + ',' + this.w + ',' + this.h }
   };
 
