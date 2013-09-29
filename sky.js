@@ -9,6 +9,7 @@
     update: update,
     copy: function (b) { return update({}, b) },
     clip: function (x, m, M) { return Math.min(Math.max(x, m), M) },
+    def: function (x, d) { return isNaN(x) ? d : x },
     mix: function (x, opts) {
       var o = update({min: 0, max: 100, lo: {b: 100}, hi: {r: 100}}, opts);
       var m = o.min, M = o.max, lo = o.lo, hi = o.hi;

@@ -1,10 +1,10 @@
 (function () {
-  var clip = Sky.util.clip, update = Sky.util.update;
+  var def = Sky.util.def, clip = Sky.util.clip, up = Sky.util.update;
   var log = Math.log, sgn = function (x) { return x < 0 ? -1 : 1 }
 
   Sky.Elem.prototype.update({
     dbltap: function (fun, opts) {
-      var opts = update({gap: 250}, opts);
+      var opts = up({gap: 250}, opts);
       var taps = 0;
       this.on('mouseup touchend', function () {
         if (taps++)
@@ -15,7 +15,7 @@
     },
 
     press: function (o, opts) {
-      var opts = update({gain: 1, every: 1}, opts);
+      var opts = up({gain: 1, every: 1}, opts);
       var press, i;
       this.on('mousedown touchstart', function () {
         if (!press)
@@ -32,7 +32,7 @@
       return this;
     },
     swipe: function (o, opts) {
-      var opts = update({glob: true}, opts);
+      var opts = up({glob: true}, opts);
       var glob = opts.glob, stop = opts.stop;
       var swipe, lx, ly;
       var doc = this.doc(), that = glob ? doc : this;
@@ -63,7 +63,7 @@
       return this;
     },
     scroll: function (o, opts) {
-      var opts = update({}, opts);
+      var opts = up({}, opts);
       var stop = opts.stop;
       return this.on('mousewheel', function (e) {
         Orb.move(o, e.wheelDeltaX, e.wheelDeltaY);
@@ -74,7 +74,7 @@
     },
 
     spring: function (o, opts) {
-      var opts = update({}, opts);
+      var opts = up({}, opts);
       var kx = opts.kx || 8, ky = opts.ky || 8;
       var restore = opts.restore || function (dx, dy, mx, my) {
         if (mx > 1) dx /= kx * log(mx + 1);
@@ -115,12 +115,10 @@
 
   Sky.SVGElem.prototype.update({
     dolly: function (o, opts) {
-      var opts = update({}, opts);
-      var bbox = opts.bbox, vbox = opts.vbox || this.node.getBBox();
-      var xmin = bbox ? bbox.x : -Infinity;
-      var xmax = bbox ? bbox.x + bbox.width - vbox.width : Infinity;
-      var ymin = bbox ? bbox.y : -Infinity;
-      var ymax = bbox ? bbox.y + bbox.height - vbox.height : Infinity;
+      var opts = up({}, opts);
+      var bbox = opts.bbox || {}, vbox = opts.vbox || this.node.getBBox();
+      var xmin = def(bbox.x, -Infinity), xmax = def(bbox.x + bbox.width - vbox.width, Infinity);
+      var ymin = def(bbox.y, -Infinity), ymax = def(bbox.y + bbox.height - vbox.height, Infinity);
       var elem = this.attrs({viewBox: [vbox.x, vbox.y, vbox.width, vbox.height]});
       return this.orb({
         move: function (dx, dy) {
@@ -133,12 +131,10 @@
       }, o);
     },
     wagon: function (o, opts) {
-      var opts = update({}, opts);
-      var bbox = opts.bbox;
-      var xmin = bbox ? bbox.x : -Infinity;
-      var xmax = bbox ? bbox.x + bbox.width : Infinity;
-      var ymin = bbox ? bbox.y : -Infinity;
-      var ymax = bbox ? bbox.y + bbox.height : Infinity;
+      var opts = up({}, opts);
+      var bbox = opts.bbox || {};
+      var xmin = def(bbox.x, -Infinity), xmax = def(bbox.x + bbox.width, Infinity);
+      var ymin = def(bbox.y, -Infinity), ymax = def(bbox.y + bbox.height, Infinity);
       var elem = this;
       return this.orb({
         move: function (dx, dy) {
@@ -148,25 +144,6 @@
           elem.transform(this.push(dx, dy, cur) || cur);
         }
       }, o);
-    },
-
-    maglev: function (o, opts) {
-      var opts = update({}, opts);
-      var cbox = this.node.getBBox(), gbox = opts.gbox || {}
-      var elem = this, w = gbox.width || cbox.width, h = gbox.height || cbox.height;
-      return this.spring(this.wagon(o, opts), {
-        kx: opts.kx,
-        ky: opts.ky,
-        balance: function () {
-          var t = elem.transformation(), z = t.translate;
-          var ox = ~~(z[0] % w), oy = ~~(z[1] % h);
-          if (ox || oy)
-            this.move(Math.abs(ox) < w / 2 ? -ox : sgn(ox) * w - ox,
-                      Math.abs(oy) < h / 2 ? -oy : sgn(oy) * h - oy);
-          else
-            elem.trigger('nestle', [~~(z[0] / w), ~~(z[1] / h)]);
-        }
-      });
     }
   });
 
@@ -176,20 +153,80 @@
     this.elem = elem || this.elem;
     this.grip = 0;
   }
-  Orb.prototype.update = function (obj) { return update(this, obj) }
+  Orb.prototype.update = function (obj) { return up(this, obj) }
   Orb.prototype = Orb.prototype.update({
     prop: function (f, a) { return Orb.do(this.jack, f, a) },
     push: function () { return this.prop('move', arguments) },
     grab: function () { this.grip++; return this.prop('grab') },
     free: function () { this.grip--; return this.prop('free') },
-    move: function () { return this.prop('move', arguments) }
+    move: function () { return this.prop('move', arguments) },
+
+    guide: function (o, opts) {
+      var opts = up({}, opts);
+      var elem = this.elem;
+      var bbox = elem.node.getBBox(), lane = opts.lane || {}
+      var w = lane.width || bbox.width, h = lane.height || bbox.height;
+      return elem.spring(o ? [].concat(this, o) : this, {
+        kx: opts.kx,
+        ky: opts.ky,
+        balance: function () {
+          var t = elem.transformation(), z = t.translate || [0, 0];
+          var ox = ~~(z[0] % w), oy = ~~(z[1] % h);
+          if (ox || oy)
+            this.move(Math.abs(ox) < w / 2 ? -ox : sgn(ox) * w - ox,
+                      Math.abs(oy) < h / 2 ? -oy : sgn(oy) * h - oy);
+          else
+            elem.trigger('settle', [~~(z[0] / w), ~~(z[1] / h)]);
+        }
+      });
+    },
+
+    loop: function (o, opts) {
+      var opts = up({}, opts);
+      var bbox = opts.bbox || {}, wrap = opts.wrap || function () {};
+      var xmin = def(bbox.x, -Infinity), xmax = def(bbox.x + bbox.width, Infinity);
+      var ymin = def(bbox.y, -Infinity), ymax = def(bbox.y + bbox.height, Infinity);
+      var wide = xmax - xmin, high = ymax - ymin;
+      var elem = this.elem;
+      return elem.orb({
+        move: function (dx, dy) {
+          var t = this.push(dx, dy) || elem.transformation(), z = t.translate || [0, 0];
+          var ox = z[0], oy = z[1], over = true;
+          while (over) {
+            over = false;
+            if (wide) {
+              if (ox < xmin)
+                over = wrap.call(this, +1, 0, ox += wide, oy) || true;
+              if (ox > xmax)
+                over = wrap.call(this, -1, 0, ox -= wide, oy) || true;
+            }
+            if (high) {
+              if (oy < ymin)
+                over = wrap.call(this, 0, +1, ox, oy += high) || true;
+              if (oy > ymax)
+                over = wrap.call(this, 0, -1, ox, oy -= high) || true;
+            }
+          }
+          t.translate = [ox, oy];
+          elem.transform(t);
+        }
+      }, o ? [].concat(this, o) : this);
+    }
   });
-  Orb = update(Orb, {
-    do: function (o, f, a) { return o && o[f] && o[f].apply(o, a) },
-    grab: function (o) { return o.grab && o.grab() },
-    free: function (o) { return o.free && o.free() },
+
+  Orb = up(Orb, {
+    do: function (o, f, a) {
+      if (o) {
+        if (o[f])
+          return o[f].apply(o, a);
+        if (o instanceof Array)
+          return o.reduce(function (_, i) { return Orb.do(i, f, a) }, 0);
+      }
+    },
+    grab: function (o) { return Orb.do(o, 'grab') },
+    free: function (o) { return Orb.do(o, 'free') },
     move: function (o, dx, dy, a, r, g, s) {
-      return o.move && o.move(dx || 0, dy || 0, a, r, g, s);
+      return Orb.do(o, 'move', [dx || 0, dy || 0, a, r, g, s]);
     },
     init: function (o) { Orb.call(o); return o },
     type: function (cons, proto) {
