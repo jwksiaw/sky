@@ -1,6 +1,43 @@
 (function () {
   var def = Sky.util.def, clip = Sky.util.clip, up = Sky.util.update;
   var log = Math.log, sgn = function (x) { return x < 0 ? -1 : 1 }
+  var cat = function (a, b) { return b ? [].concat(a, b) : a }
+
+  Orb = function Orb(obj, jack, elem) {
+    this.update(obj);
+    this.jack = jack || this.jack;
+    this.elem = elem || this.elem;
+    this.grip = 0;
+  }
+  Orb.prototype.update = function (obj) { return up(this, obj) }
+  Orb.prototype.update({
+    prop: function (f, a) { return Orb.do(this.jack, f, a) },
+    push: function () { return this.prop('move', arguments) },
+    grab: function () { this.grip++; return this.prop('grab') },
+    free: function () { this.grip--; return this.prop('free') },
+    move: function () { return this.prop('move', arguments) },
+  });
+  Orb = up(Orb, {
+    do: function (o, f, a) {
+      if (o) {
+        if (o[f])
+          return o[f].apply(o, a);
+        if (o instanceof Array)
+          return o.reduce(function (_, i) { return Orb.do(i, f, a) }, 0);
+      }
+    },
+    grab: function (o) { return Orb.do(o, 'grab') },
+    free: function (o) { return Orb.do(o, 'free') },
+    move: function (o, dx, dy, a, r, g, s) {
+      return Orb.do(o, 'move', [dx || 0, dy || 0, a, r, g, s]);
+    },
+    init: function (o) { Orb.call(o); return o },
+    type: function (cons, proto) {
+      cons.prototype = new Orb().update(proto);
+      cons.prototype.constructor = cons;
+      return function (a, r, g, s) { return Orb.init(new cons(this, a, r, g, s)) }
+    }
+  });
 
   Sky.Elem.prototype.update({
     dbltap: function (fun, opts) {
@@ -73,7 +110,7 @@
       }).swipe(o, opts);
     },
 
-    spring: function (o, opts) {
+    spring: Orb.type(function Spring(elem, jack, opts) {
       var opts = up({}, opts);
       var kx = opts.kx || 8, ky = opts.ky || 8;
       var restore = opts.restore || function (dx, dy, mx, my) {
@@ -84,89 +121,76 @@
         return this.push(dx, dy, this);
       }
       var stretch = opts.stretch, balance = opts.balance, perturb = opts.perturb;
-      var elem = this, anim;
-      var s = this.orb({
-        dx: 0,
-        dy: 0,
-        move: function (dx, dy) {
-          s.dx += dx;
-          s.dy += dy;
-          stretch && stretch.call(s);
-          if (!anim) {
-            anim = elem.animate(function () {
-              var dx = s.dx, dy = s.dy, mx = Math.abs(dx), my = Math.abs(dy);
-              var more = restore.call(s, dx, dy, mx, my) || s.dx || s.dy || s.grip;
-              if (!more) {
-                anim = null;
-                balance && balance.call(s);
-              }
-              return more;
-            });
-            perturb && perturb.call(s);
-          }
+      var anim;
+
+      this.dx = 0;
+      this.dy = 0;
+      this.elem = elem;
+      this.jack = jack;
+      this.move = function (dx, dy) {
+        var s = this;
+        s.dx += dx;
+        s.dy += dy;
+        stretch && stretch.call(s);
+        if (!anim) {
+          anim = elem.animate(function () {
+            var dx = s.dx, dy = s.dy, mx = Math.abs(dx), my = Math.abs(dy);
+            var more = restore.call(s, dx, dy, mx, my) || s.dx || s.dy || s.grip;
+            if (!more) {
+              anim = null;
+              balance && balance.call(s);
+            }
+            return more;
+          });
+          perturb && perturb.call(s);
         }
-      }, o);
-      return s;
-    },
-    orb: function (obj, jack) {
-      return new Orb(obj, jack, this);
-    }
+      }
+    })
   });
 
   Sky.SVGElem.prototype.update({
-    dolly: function (o, opts) {
+    dolly: Orb.type(function Dolly(elem, jack, opts) {
       var opts = up({}, opts);
-      var bbox = opts.bbox || {}, vbox = opts.vbox || this.node.getBBox();
+      var bbox = opts.bbox || {}, vbox = opts.vbox || elem.node.getBBox();
       var xmin = def(bbox.x, -Infinity), xmax = def(bbox.x + bbox.width - vbox.width, Infinity);
       var ymin = def(bbox.y, -Infinity), ymax = def(bbox.y + bbox.height - vbox.height, Infinity);
-      var elem = this.attrs({viewBox: [vbox.x, vbox.y, vbox.width, vbox.height]});
-      return this.orb({
-        move: function (dx, dy) {
-          var cur = elem.node.viewBox.baseVal;
-          var dim = [clip(cur.x - dx, xmin, xmax),
-                     clip(cur.y - dy, ymin, ymax),
-                     cur.width, cur.height];
-          elem.attrs({viewBox: this.push(dx, dy, dim) || dim});
-        }
-      }, o);
-    },
-    wagon: function (o, opts) {
+
+      this.elem = elem.attrs({viewBox: [vbox.x, vbox.y, vbox.width, vbox.height]});
+      this.jack = jack;
+      this.move = function (dx, dy) {
+        var cur = elem.node.viewBox.baseVal;
+        var dim = [clip(cur.x - dx, xmin, xmax),
+                   clip(cur.y - dy, ymin, ymax),
+                   cur.width, cur.height];
+        elem.attrs({viewBox: this.push(dx, dy, dim) || dim});
+      }
+    }),
+    wagon: Orb.type(function Wagon(elem, jack, opts) {
       var opts = up({}, opts);
       var bbox = opts.bbox || {};
       var xmin = def(bbox.x, -Infinity), xmax = def(bbox.x + bbox.width, Infinity);
       var ymin = def(bbox.y, -Infinity), ymax = def(bbox.y + bbox.height, Infinity);
-      var elem = this;
-      return this.orb({
-        move: function (dx, dy) {
-          var cur = elem.transformation(), off = cur.translate || [0, 0];
-          cur.translate = [clip(off[0] + dx, xmin, xmax),
-                           clip(off[1] + dy, ymin, ymax)];
-          elem.transform(this.push(dx, dy, cur) || cur);
-        }
-      }, o);
-    }
+
+      this.elem = elem;
+      this.jack = jack;
+      this.move = function (dx, dy) {
+        var cur = elem.transformation(), off = cur.translate || [0, 0];
+        cur.translate = [clip(off[0] + dx, xmin, xmax),
+                         clip(off[1] + dy, ymin, ymax)];
+        elem.transform(this.push(dx, dy, cur) || cur);
+      }
+    })
   });
 
-  Orb = function Orb(obj, jack, elem) {
-    this.update(obj);
-    this.jack = jack || this.jack;
-    this.elem = elem || this.elem;
-    this.grip = 0;
-  }
-  Orb.prototype.update = function (obj) { return up(this, obj) }
-  Orb.prototype = Orb.prototype.update({
-    prop: function (f, a) { return Orb.do(this.jack, f, a) },
-    push: function () { return this.prop('move', arguments) },
-    grab: function () { this.grip++; return this.prop('grab') },
-    free: function () { this.grip--; return this.prop('free') },
-    move: function () { return this.prop('move', arguments) },
-
-    guide: function (o, opts) {
+  Orb.prototype.update({
+    guide: Orb.type(function Guide(orb, jack, opts) {
       var opts = up({}, opts);
-      var elem = this.elem;
-      var bbox = elem.node.getBBox(), lane = opts.lane || {}
+      var elem = orb.elem;
+      var bbox = elem.node.getBBox(), lane = opts.lane || {};
       var w = lane.width || bbox.width, h = lane.height || bbox.height;
-      return elem.spring(o ? [].concat(this, o) : this, {
+
+      this.elem = elem;
+      this.jack = elem.spring(cat(orb, jack), {
         kx: opts.kx,
         ky: opts.ky,
         balance: function () {
@@ -179,60 +203,39 @@
             elem.trigger('settle', [~~(z[0] / w), ~~(z[1] / h)]);
         }
       });
-    },
+    }),
 
-    loop: function (o, opts) {
+    loop: Orb.type(function Loop(orb, jack, opts) {
       var opts = up({}, opts);
       var bbox = opts.bbox || {}, wrap = opts.wrap || function () {};
       var xmin = def(bbox.x, -Infinity), xmax = def(bbox.x + bbox.width, Infinity);
       var ymin = def(bbox.y, -Infinity), ymax = def(bbox.y + bbox.height, Infinity);
       var wide = xmax - xmin, high = ymax - ymin;
-      var elem = this.elem;
-      return elem.orb({
-        move: function (dx, dy) {
-          var t = this.push(dx, dy) || elem.transformation(), z = t.translate || [0, 0];
-          var ox = z[0], oy = z[1], over = true;
-          while (over) {
-            over = false;
-            if (wide) {
-              if (ox < xmin)
-                over = wrap.call(this, +1, 0, ox += wide, oy) || true;
-              if (ox > xmax)
-                over = wrap.call(this, -1, 0, ox -= wide, oy) || true;
-            }
-            if (high) {
-              if (oy < ymin)
-                over = wrap.call(this, 0, +1, ox, oy += high) || true;
-              if (oy > ymax)
-                over = wrap.call(this, 0, -1, ox, oy -= high) || true;
-            }
-          }
-          t.translate = [ox, oy];
-          elem.transform(t);
-        }
-      }, o ? [].concat(this, o) : this);
-    }
-  });
+      var elem = orb.elem;
 
-  Orb = up(Orb, {
-    do: function (o, f, a) {
-      if (o) {
-        if (o[f])
-          return o[f].apply(o, a);
-        if (o instanceof Array)
-          return o.reduce(function (_, i) { return Orb.do(i, f, a) }, 0);
+      this.elem = elem;
+      this.jack = cat(orb, jack);
+      this.move = function (dx, dy) {
+        var t = this.push(dx, dy) || elem.transformation(), z = t.translate || [0, 0];
+        var ox = z[0], oy = z[1], over = true;
+        while (over) {
+          over = false;
+          if (wide) {
+            if (ox < xmin)
+              over = wrap.call(this, +1, 0, ox += wide, oy) || true;
+            if (ox > xmax)
+              over = wrap.call(this, -1, 0, ox -= wide, oy) || true;
+          }
+          if (high) {
+            if (oy < ymin)
+              over = wrap.call(this, 0, +1, ox, oy += high) || true;
+            if (oy > ymax)
+              over = wrap.call(this, 0, -1, ox, oy -= high) || true;
+          }
+        }
+        t.translate = [ox, oy];
+        elem.transform(t);
       }
-    },
-    grab: function (o) { return Orb.do(o, 'grab') },
-    free: function (o) { return Orb.do(o, 'free') },
-    move: function (o, dx, dy, a, r, g, s) {
-      return Orb.do(o, 'move', [dx || 0, dy || 0, a, r, g, s]);
-    },
-    init: function (o) { Orb.call(o); return o },
-    type: function (cons, proto) {
-      cons.prototype = new Orb().update(proto);
-      cons.prototype.constructor = cons;
-      return function (a, r, g, s) { return Orb.init(new cons(a, r, g, s)) }
-    }
+    })
   });
 })();

@@ -29,9 +29,7 @@
     cut: function (x) { return util.clip(x, -359.999, 359.999) }
   }
 
-  var path = function (cmd) {
-    return cmd + Array.prototype.slice.call(arguments, 1);
-  }
+  var path = function (cmd) { return cmd + Array.prototype.slice.call(arguments, 1) }
   path = update(path, {
     M: function (xy) { return path('M', xy) },
     L: function (xy) { return path('L', xy) },
@@ -123,7 +121,7 @@
     this.props(props);
   }
   Elem.prototype.update = function (obj) { return update(this, obj) }
-  Elem.prototype = Elem.prototype.update({
+  Elem.prototype.update({
     xmlns: "http://www.w3.org/1999/xhtml",
     addTo: function (parent) {
       var p = parent instanceof Node ? parent : parent.node;
