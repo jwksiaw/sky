@@ -179,6 +179,38 @@
                          clip(off[1] + dy, ymin, ymax)];
         elem.transform(this.push(dx, dy, cur) || cur);
       }
+    }),
+
+    loop: Orb.type(function Loop(elem, jack, opts) {
+      var opts = up({}, opts);
+      var bbox = opts.bbox || {}, wrap = opts.wrap || function () {};
+      var xmin = def(bbox.x, -Infinity), xmax = def(bbox.x + bbox.width, Infinity);
+      var ymin = def(bbox.y, -Infinity), ymax = def(bbox.y + bbox.height, Infinity);
+      var wide = xmax - xmin, high = ymax - ymin;
+
+      this.elem = elem;
+      this.jack = jack;
+      this.move = function (dx, dy, cur) {
+        var off = cur.translate || [0, 0];
+        var ox = off[0], oy = off[1], over = true;
+        while (over) {
+          over = false;
+          if (wide) {
+            if (ox < xmin)
+              over = wrap.call(this, +1, 0, ox += wide, oy) || true;
+            if (ox > xmax)
+              over = wrap.call(this, -1, 0, ox -= wide, oy) || true;
+          }
+          if (high) {
+            if (oy < ymin)
+              over = wrap.call(this, 0, +1, ox, oy += high) || true;
+            if (oy > ymax)
+              over = wrap.call(this, 0, -1, ox, oy -= high) || true;
+          }
+        }
+        cur.translate = [ox, oy];
+        return this.push(dx, dy, cur) || cur;
+      }
     })
   });
 
@@ -203,39 +235,6 @@
             elem.trigger('settle', [~~(z[0] / w), ~~(z[1] / h)]);
         }
       });
-    }),
-
-    loop: Orb.type(function Loop(orb, jack, opts) {
-      var opts = up({}, opts);
-      var bbox = opts.bbox || {}, wrap = opts.wrap || function () {};
-      var xmin = def(bbox.x, -Infinity), xmax = def(bbox.x + bbox.width, Infinity);
-      var ymin = def(bbox.y, -Infinity), ymax = def(bbox.y + bbox.height, Infinity);
-      var wide = xmax - xmin, high = ymax - ymin;
-      var elem = orb.elem;
-
-      this.elem = elem;
-      this.jack = cat(orb, jack);
-      this.move = function (dx, dy) {
-        var t = this.push(dx, dy) || elem.transformation(), z = t.translate || [0, 0];
-        var ox = z[0], oy = z[1], over = true;
-        while (over) {
-          over = false;
-          if (wide) {
-            if (ox < xmin)
-              over = wrap.call(this, +1, 0, ox += wide, oy) || true;
-            if (ox > xmax)
-              over = wrap.call(this, -1, 0, ox -= wide, oy) || true;
-          }
-          if (high) {
-            if (oy < ymin)
-              over = wrap.call(this, 0, +1, ox, oy += high) || true;
-            if (oy > ymax)
-              over = wrap.call(this, 0, -1, ox, oy -= high) || true;
-          }
-        }
-        t.translate = [ox, oy];
-        elem.transform(t);
-      }
     })
   });
 })();
