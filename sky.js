@@ -1,4 +1,7 @@
 (function () {
+  var def = function (x, d) { return isNaN(x) ? d : x }
+  var get = function (a, k, d) { var v = a[k]; return v == undefined ? d : v }
+  var pop = function (a, k, d) { var v = get(a, k, d); delete a[k]; return v }
   var update = function (a, b) {
     for (var k in b)
       a[k] = b[k];
@@ -6,10 +9,12 @@
   }
   var anim = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame;
   var util = {
+    def: def,
+    get: get,
+    pop: pop,
     update: update,
     copy: function (b) { return update({}, b) },
     clip: function (x, m, M) { return Math.min(Math.max(x, m), M) },
-    def: function (x, d) { return isNaN(x) ? d : x },
     mix: function (x, opts) {
       var o = update({min: 0, max: 100, lo: {b: 100}, hi: {r: 100}}, opts);
       var m = o.min, M = o.max, lo = o.lo, hi = o.hi;
@@ -30,30 +35,34 @@
   }
 
   var path = function (cmd) { return cmd + Array.prototype.slice.call(arguments, 1) }
-  path = update(path, {
+  update(path, {
     M: function (xy) { return path('M', xy) },
     L: function (xy) { return path('L', xy) },
     join: function () {
       return Array.prototype.reduce.call(arguments, function (d, a) { return d + path.apply(null, a) }, '');
     },
+    line: function (x1, y1, x2, y2) {
+      var open = open || path.M;
+      return open([x1, y1]) + path.L([x2, y2]);
+    },
     triangle: function (cx, cy, b, h, open) {
       var open = open || path.M;
-      var h = h == undefined ? b : h;
+      var h = def(h, b);
       var x = cx - b / 2, y = cy - h / 2;
       return open([x, y]) + path('L', cx, y + h) + path('L', x + b, y) + 'Z';
     },
     frame: function (cx, cy, w, h, open) {
-      var h = h == undefined ? w : h;
+      var h = def(h, w);
       return path.rect(cx - w / 2, cy - h / 2, w, h, open);
     },
     rect: function (x, y, w, h, open) {
       var open = open || path.M;
-      var h = h == undefined ? w : h;
+      var h = def(h, w);
       return open([x, y]) + path('H', x + w) + path('V', y + h) + path('H', x) + 'Z';
     },
     arc: function (cx, cy, rx, ry, len, off, open) {
       var open = open || path.M;
-      var len = trig.cut(len == undefined ? 360 : len), off = off || 0;
+      var len = trig.cut(def(len, 360)), off = off || 0;
       var ix = cx + rx * trig.cos(off), iy = cy + ry * trig.sin(off);
       var fx = cx + rx * trig.cos(off + len), fy = cy + ry * trig.sin(off + len);
       return (open([ix, iy]) +
@@ -64,17 +73,17 @@
                    fx, fy));
     },
     oval: function (cx, cy, rx, ry, open) {
-      var ry = ry == undefined ? rx : ry;
+      var ry = def(ry, rx);
       return path.arc(cx, cy, rx, ry, 360, 0, open);
     },
     arch: function (cx, cy, rx, ry, t, len, off, open) {
-      var len = trig.cut(len == undefined ? 360 : len), off = off || 0;
-      var t = t == undefined ? 1 : t;
+      var len = trig.cut(def(len, 360)), off = off || 0;
+      var t = def(t, 1);
       return (path.arc(cx, cy, rx, ry, len, off, open) +
               path.arc(cx, cy, rx + t, ry + t, -len, off + len, path.L) + 'Z');
     },
     ring: function (cx, cy, rx, ry, t, open) {
-      var t = t == undefined ? 1 : t;
+      var t = def(t, 1);
       return (path.arc(cx, cy, rx, ry, 360, 0, open) +
               path.arc(cx, cy, rx + t, ry + t, -360, 360));
     }
@@ -261,6 +270,9 @@
       p.x = x;
       p.y = y;
       return p;
+    },
+    polar: function (r, a) {
+      return [r * trig.cos(a), r * trig.sin(a)];
     },
     transform: function (desc) {
       var xform = [];

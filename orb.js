@@ -1,13 +1,14 @@
 (function () {
-  var def = Sky.util.def, clip = Sky.util.clip, up = Sky.util.update;
+  var def = Sky.util.def, clip = Sky.util.clip;
+  var pop = Sky.util.pop, up = Sky.util.update;
   var log = Math.log, sgn = function (x) { return x < 0 ? -1 : 1 }
   var cat = function (a, b) { return b ? [].concat(a, b) : a }
 
   Orb = function Orb(obj, jack, elem) {
-    this.update(obj);
     this.jack = jack || this.jack;
     this.elem = elem || this.elem;
     this.grip = 0;
+    this.update(obj);
   }
   Orb.prototype.update = function (obj) { return up(this, obj) }
   Orb.prototype.update({
@@ -40,13 +41,29 @@
   });
 
   Sky.Elem.prototype.update({
+    tap: function (fun) {
+      var opts = up({gap: 250}, opts);
+      var open;
+      this.on('mousedown touchstart', function (e) {
+        open = true;
+        setTimeout(function () { open = false }, opts.gap);
+        e.preventDefault();
+      });
+      this.on('mouseup touchend', function (e) {
+        if (open)
+          fun();
+        e.preventDefault();
+      });
+      return this;
+    },
     dbltap: function (fun, opts) {
       var opts = up({gap: 250}, opts);
       var taps = 0;
-      this.on('mouseup touchend', function () {
+      this.on('mouseup touchend', function (e) {
         if (taps++)
           fun();
         setTimeout(function () { taps = 0 }, opts.gap);
+        e.preventDefault();
       });
       return this;
     },
@@ -54,17 +71,19 @@
     press: function (o, opts) {
       var opts = up({gain: 1, every: 1}, opts);
       var press, i;
-      this.on('mousedown touchstart', function () {
+      this.on('mousedown touchstart', function (e) {
         if (!press)
           Orb.grab(o);
         press = true;
         i = setInterval(function () { Orb.move(o, opts.gain) }, opts.every);
+        e.preventDefault();
       });
-      this.doc().on('mouseup touchend', function () {
+      this.doc().on('mouseup touchend', function (e) {
         if (press)
           Orb.free(o);
         press = false;
         clearInterval(i);
+        e.preventDefault();
       });
       return this;
     },
@@ -80,6 +99,7 @@
         swipe = true;
         lx = t.pageX;
         ly = t.pageY;
+        e.preventDefault();
       });
       that.on('mousemove touchmove', function (e) {
         if (swipe) {
@@ -92,10 +112,11 @@
           e.preventDefault();
         }
       });
-      doc.on('mouseup touchend', function () {
+      doc.on('mouseup touchend', function (e) {
         if (swipe)
           Orb.free(o);
         swipe = false;
+        e.preventDefault();
       });
       return this;
     },
@@ -108,6 +129,10 @@
           e.stopImmediatePropagation();
         e.preventDefault();
       }).swipe(o, opts);
+    },
+
+    orb: function (obj, jack) {
+      return new Orb(obj, jack, this);
     },
 
     spring: Orb.type(function Spring(elem, jack, opts) {
@@ -133,6 +158,7 @@
         s.dy += dy;
         stretch && stretch.call(s);
         if (!anim) {
+          perturb && perturb.call(s);
           anim = elem.animate(function () {
             var dx = s.dx, dy = s.dy, mx = Math.abs(dx), my = Math.abs(dy);
             var more = restore.call(s, dx, dy, mx, my) || s.dx || s.dy || s.grip;
@@ -142,7 +168,6 @@
             }
             return more;
           });
-          perturb && perturb.call(s);
         }
       }
     })
@@ -218,23 +243,23 @@
     guide: Orb.type(function Guide(orb, jack, opts) {
       var opts = up({}, opts);
       var elem = orb.elem;
-      var bbox = elem.node.getBBox(), lane = opts.lane || {};
+      var bbox = elem.node.getBBox(), lane = pop(opts, 'lane', {});
       var w = lane.width || bbox.width, h = lane.height || bbox.height;
+      var balance = opts.balance, truncate = pop(opts, 'truncate');
 
       this.elem = elem;
-      this.jack = elem.spring(cat(orb, jack), {
-        kx: opts.kx,
-        ky: opts.ky,
+      this.jack = elem.spring(cat(orb, jack), up(opts, {
         balance: function () {
           var t = elem.transformation(), z = t.translate || [0, 0];
-          var ox = ~~(z[0] % w), oy = ~~(z[1] % h);
-          if (ox || oy)
-            this.move(Math.abs(ox) < w / 2 ? -ox : sgn(ox) * w - ox,
-                      Math.abs(oy) < h / 2 ? -oy : sgn(oy) * h - oy);
+          var ox = w && z[0] % w, oy = h && z[1] % h;
+          if (Math.abs(ox) > 1e-3 || Math.abs(oy) > 1e-3)
+            this.move(Math.abs(ox) < w / 2 && !truncate ? -ox : sgn(ox) * w - ox,
+                      Math.abs(oy) < h / 2 && !truncate ? -oy : sgn(oy) * h - oy);
           else
             elem.trigger('settle', [~~(z[0] / w), ~~(z[1] / h)]);
+          balance && balance.call(this);
         }
-      });
+      }));
     })
   });
 })();
