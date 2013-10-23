@@ -135,6 +135,22 @@
       return new Orb(obj, jack, this);
     },
 
+    crank: Orb.type(function Spring(elem, jack, opts) {
+      var opts = up({}, opts);
+      var cx = opts.cx || 0, cy = opts.cy || 0;
+
+      this.elem = elem;
+      this.jack = jack;
+      this.move = function (dx, dy, px, py) {
+        var rx = px - cx, ry = py - cy;
+        if (rx > 0)
+          dy = -dy;
+        if (ry < 0)
+          dx = -dx;
+        return this.push(dx + dy, 0, this);
+      }
+    }),
+
     spring: Orb.type(function Spring(elem, jack, opts) {
       var opts = up({}, opts);
       var kx = opts.kx || 8, ky = opts.ky || 8;
