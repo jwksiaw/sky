@@ -243,14 +243,14 @@
     g: function (attrs, props) {
       return this.child('g', attrs, props);
     },
-    image: function (x, y, w, h, href, xattrs) {
-      return this.child('image').attrs(update({href: href}, xattrs), this.xlink).attrs({x: x, y: y, width: w, height: h});
+    image: function (href) {
+      return this.child('image').href(href);
     },
-    link: function (href, xattrs) {
-      return this.child('a').attrs(update({href: href}, xattrs), this.xlink);
+    link: function (href) {
+      return this.child('a').href(href);
     },
-    use: function (href, xattrs) {
-      return this.child('use').attrs(update({href: href}, xattrs), this.xlink);
+    use: function (href) {
+      return this.child('use').href(href);
     },
     svg: function (attrs, props) {
       return this.child('svg', attrs, props);
@@ -264,6 +264,12 @@
     fit: function () {
       var box = this.node.getBBox();
       return this.enc().attrs({viewBox: [box.x, box.y, box.width, box.height]});
+    },
+    href: function (href) {
+      return this.attrs({href: href}, this.xlink);
+    },
+    xywh: function (x, y, w, h) {
+      return this.attrs({x: x, y: y, width: w, height: h});
     },
     point: function (x, y) {
       var p = this.enc().node.createSVGPoint();
