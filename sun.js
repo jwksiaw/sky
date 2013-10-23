@@ -15,6 +15,66 @@
     int: int,
     mod: mod,
     pad: pad,
+    ellipsis: function (text, n) {
+      if (n && text.length > n + 3)
+        return text.substr(0, n) + '\u2026';
+      return text;
+    },
+    fold: function (fun, acc, obj) {
+      if (obj && obj.reduce)
+        return obj.reduce(fun, acc);
+      var i = 0;
+      for (var k in obj)
+        acc = fun(acc, [k, obj[k]], i++, obj);
+      return acc;
+    },
+    repeat: function (fun, every) {
+      return fun() || setTimeout(function () {
+        fun() || setTimeout(arguments.callee, every);
+      }, every);
+    },
+    up: function (a, b) {
+      for (var k in b)
+        a[k] = b[k];
+      return a;
+    }
+  }
+
+  Sun.form = {
+    encode: function (obj) {
+      var list = [];
+      for (var k in obj)
+        list.push(encodeURIComponent(k) + '=' + encodeURIComponent(obj[k]));
+      return list.join('&');
+    },
+    decode: function (str) {
+      var list = str.split('&');
+      return list.reduce(function (acc, item) {
+        var kv = item.split('=').map(decodeURIComponent);
+        acc[kv[0]] = kv[1];
+        return acc;
+      }, {});
+    }
+  }
+
+  Sun.http = Sun.up(function (method, url, fun, data, hdrs) {
+    var req = new XMLHttpRequest();
+    req.onreadystatechange = function () {
+      if (this.readyState == this.DONE){
+        fun(this);
+      }
+    };
+    req.open(method, url, true);
+    Sun.fold(function (_, o) { req.setRequestHeader(o[0], o[1]) }, null, hdrs);
+    req.send(data);
+    return req;
+  }, {
+    get:  function (url, fun, hdrs)       { return Sun.http("GET",  url, fun, null, hdrs) },
+    put:  function (url, fun, data, hdrs) { return Sun.http("PUT",  url, fun, data, hdrs) },
+    post: function (url, fun, data, hdrs) { return Sun.http("POST", url, fun, data, hdrs) }
+  });
+
+  Sun.lists = {
     groupby: function (list, key) {
       var k, key = key || function (item) { return item[0] }
       return list.reduce(function (acc, item) {
@@ -27,15 +87,25 @@
         return acc;
       }, []);
     },
-    repeat: function (fun, every) {
-      return fun() || setTimeout(function () {
-        fun() || setTimeout(arguments.callee, every);
-      }, every);
+    insert: function (list, item, fun) {
+      var lte = fun || function (a, b) { return a <= b };
+      for (var i = 0; i < list.length; i++)
+        if (lte(item, list[i]))
+          return list.splice(i, 0, item) && list;
+      return list.push(item) && list;
     },
-    up: function (a, b) {
-      for (var k in b)
-        a[k] = b[k];
-      return a;
+    keyfind: function (list, val, key) {
+      for (var i = 0, k = key || 0; i < list.length; i++) {
+        var v = list[i][k];
+        if (v <= val && v >= val)
+          return list[i];
+      }
+    },
+    values: function (obj) {
+      var vals = [];
+      for (var k in obj)
+        vals.push(obj[k]);
+      return vals;
     }
   }
 
@@ -70,7 +140,7 @@
         var t = opt.start || new Date, stop = opt.stop, step = opt.step || {d: 1};
         var f = Sun.time.pass(step, t) >= t;
         for ( ; !stop || (f ? (t < stop) : (t > stop)); t = Sun.time.pass(step, t))
-          acc = fun(t, acc);
+          acc = fun(acc, t);
         return acc;
       },
       parse: function (stamp, opt) {
