@@ -138,11 +138,12 @@
     crank: Orb.type(function Spring(elem, jack, opts) {
       var opts = up({}, opts);
       var cx = opts.cx || 0, cy = opts.cy || 0;
+      var c = elem.point(cx, cy).matrixTransform(elem.node.getScreenCTM());
 
       this.elem = elem;
       this.jack = jack;
       this.move = function (dx, dy, px, py) {
-        var rx = px - cx, ry = py - cy;
+        var rx = px - c.x, ry = py - c.y;
         if (rx > 0)
           dy = -dy;
         if (ry < 0)
