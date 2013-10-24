@@ -281,8 +281,7 @@
       this.goto = function (i, j) {
         var t = elem.transformation(), z = t.translate || [0, 0];
         var ox = z[0] + jack.dx - (i || 0) * w, oy = z[1] + jack.dy - (j || 0) * h;
-        if (Math.abs(ox) > 1e-3 || Math.abs(oy) > 1e-3)
-          this.move(-ox, -oy);
+        this.move(-ox, -oy);
       }
 
       this.slot = function () {
