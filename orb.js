@@ -264,19 +264,26 @@
       var w = lane.width || bbox.width, h = lane.height || bbox.height;
       var balance = opts.balance, truncate = pop(opts, 'truncate');
 
-      this.elem = elem;
-      this.jack = elem.spring(cat(orb, jack), up(opts, {
+      var elem = this.elem = elem;
+      var jack = this.jack = elem.spring(cat(orb, jack), up(opts, {
         balance: function () {
           var t = elem.transformation(), z = t.translate || [0, 0];
           var ox = w && z[0] % w, oy = h && z[1] % h;
-          if (Math.abs(ox) > 1e-3 || Math.abs(oy) > 1e-3)
+          if (ox < 1e-3 || oy < 1e-3)
+            elem.trigger('settle', [~~(z[0] / w), ~~(z[1] / h)]);
+          else
             this.move(Math.abs(ox) < w / 2 && !truncate ? -ox : sgn(ox) * w - ox,
                       Math.abs(oy) < h / 2 && !truncate ? -oy : sgn(oy) * h - oy);
-          else
-            elem.trigger('settle', [~~(z[0] / w), ~~(z[1] / h)]);
           balance && balance.call(this);
         }
       }));
+
+      this.goto = function (i, j) {
+        var t = elem.transformation(), z = t.translate || [0, 0];
+        var ox = z[0] + jack.dx - (i || 0) * w, oy = z[1] + jack.dy - (j || 0) * h;
+        if (Math.abs(ox) > 1e-3 || Math.abs(oy) > 1e-3)
+          this.move(-ox, -oy);
+      }
     })
   });
 })();
