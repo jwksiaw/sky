@@ -269,11 +269,11 @@
         balance: function () {
           var t = elem.transformation(), z = t.translate || [0, 0];
           var ox = w && z[0] % w, oy = h && z[1] % h;
-          if (ox < 1e-3 && oy < 1e-3)
-            elem.trigger('settle', [~~(z[0] / w), ~~(z[1] / h)]);
-          else
+          if (Math.abs(ox) > 1e-3 || Math.abs(oy) > 1e-3)
             this.move(Math.abs(ox) < w / 2 && !truncate ? -ox : sgn(ox) * w - ox,
                       Math.abs(oy) < h / 2 && !truncate ? -oy : sgn(oy) * h - oy);
+          else
+            elem.trigger('settle', [~~(z[0] / w), ~~(z[1] / h)]);
           balance && balance.call(this);
         }
       }));
