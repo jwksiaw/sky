@@ -284,6 +284,11 @@
         if (Math.abs(ox) > 1e-3 || Math.abs(oy) > 1e-3)
           this.move(-ox, -oy);
       }
+
+      this.slot = function () {
+        var t = elem.transformation(), z = t.translate || [0, 0];
+        return [~~((z[0] + jack.dx) / w), ~~((z[1] + jack.dy) / h)];
+      }
     })
   });
 })();
