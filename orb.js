@@ -269,7 +269,7 @@
         balance: function () {
           var t = elem.transformation(), z = t.translate || [0, 0];
           var ox = w && z[0] % w, oy = h && z[1] % h;
-          if (ox < 1e-3 || oy < 1e-3)
+          if (ox < 1e-3 && oy < 1e-3)
             elem.trigger('settle', [~~(z[0] / w), ~~(z[1] / h)]);
           else
             this.move(Math.abs(ox) < w / 2 && !truncate ? -ox : sgn(ox) * w - ox,
