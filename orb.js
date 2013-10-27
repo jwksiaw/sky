@@ -41,7 +41,7 @@
   });
 
   Sky.Elem.prototype.update({
-    tap: function (fun) {
+    tap: function (fun, opts) {
       var opts = up({gap: 250}, opts);
       var open;
       this.on('mousedown touchstart', function (e) {
