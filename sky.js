@@ -119,9 +119,9 @@
 
   function RGB(d) { update(this, d) }
   RGB.prototype.toString = function () {
-    if ('a' in this)
-      return 'rgba(' + (this.r || 0) + ',' + (this.g || 0) + ',' + (this.b || 0) + ',' + this.a + ')';
-    return 'rgb(' + (this.r || 0) + ',' + (this.g || 0) + ',' + (this.b || 0) + ')';
+    if (this.a == undefined)
+      return 'rgb(' + (this.r || 0) + ',' + (this.g || 0) + ',' + (this.b || 0) + ')';
+    return 'rgba(' + (this.r || 0) + ',' + (this.g || 0) + ',' + (this.b || 0) + ',' + this.a + ')';
   }
 
   function Elem(elem, attrs, props) {
