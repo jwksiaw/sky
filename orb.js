@@ -51,7 +51,7 @@
       });
       this.on('mouseup touchend', function (e) {
         if (open)
-          fun();
+          fun && fun();
         e.preventDefault();
       });
       return this;
@@ -61,7 +61,7 @@
       var taps = 0;
       this.on('mouseup touchend', function (e) {
         if (taps++)
-          fun();
+          fun && fun();
         setTimeout(function () { taps = 0 }, opts.gap);
         e.preventDefault();
       });
