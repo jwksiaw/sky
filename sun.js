@@ -94,6 +94,13 @@
           return list.splice(i, 0, item) && list;
       return list.push(item) && list;
     },
+    keydrop: function (list, val, key) {
+      for (var i = 0, k = key || 0; i < list.length; i++) {
+        var v = list[i][k];
+        if (v <= val && v >= val)
+          return list.splice(i, 1);
+      }
+    },
     keyfind: function (list, val, key) {
       for (var i = 0, k = key || 0; i < list.length; i++) {
         var v = list[i][k];
