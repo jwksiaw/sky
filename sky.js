@@ -2,7 +2,7 @@
   var def = function (x, d) { return isNaN(x) ? d : x }
   var get = function (a, k, d) { var v = a[k]; return v == undefined ? d : v }
   var pop = function (a, k, d) { var v = get(a, k, d); delete a[k]; return v }
-  var update = function (a, b) {
+  var up = function (a, b) {
     for (var k in b)
       a[k] = b[k];
     return a;
@@ -12,11 +12,11 @@
     def: def,
     get: get,
     pop: pop,
-    update: update,
-    copy: function (b) { return update({}, b) },
+    update: up,
+    copy: function (b) { return up({}, b) },
     clip: function (x, m, M) { return Math.min(Math.max(x, m), M) },
     mix: function (x, opts) {
-      var o = update({min: 0, max: 100, lo: {b: 100}, hi: {r: 100}}, opts);
+      var o = up({min: 0, max: 100, lo: {b: 100}, hi: {r: 100}}, opts);
       var m = o.min, M = o.max, lo = o.lo, hi = o.hi;
       function w(a, b) { return ((b || 0) * Math.max(x - m, 0) + (a || 0) * Math.max(M - x, 0)) / (M - m) }
       function i(a, b) { return Math.round(w(a, b)) }
@@ -35,7 +35,7 @@
   }
 
   var path = function (cmd) { return cmd + Array.prototype.slice.call(arguments, 1) }
-  update(path, {
+  up(path, {
     M: function (xy) { return path('M', xy) },
     L: function (xy) { return path('L', xy) },
     join: function () {
@@ -106,7 +106,7 @@
     get right() { return this.x + this.w },
     get bottom() { return this.y + this.h },
     grid: function (fun, acc, opts) {
-      var o = update({rows: 1, cols: 1}, opts);
+      var o = up({rows: 1, cols: 1}, opts);
       var r = o.rows, c = o.cols;
       var x = this.x, y = this.y, w = this.w / c, h = this.h / r;
       for (var i = 0, n = 0; i < r; i++)
@@ -117,7 +117,7 @@
     toString: function () { return this.x + ',' + this.y + ',' + this.w + ',' + this.h }
   };
 
-  function RGB(d) { update(this, d) }
+  function RGB(d) { up(this, d) }
   RGB.prototype.toString = function () {
     if (this.a == undefined)
       return 'rgb(' + (this.r || 0) + ',' + (this.g || 0) + ',' + (this.b || 0) + ')';
@@ -129,7 +129,7 @@
     this.attrs(attrs);
     this.props(props);
   }
-  Elem.prototype.update = function (obj) { return update(this, obj) }
+  Elem.prototype.update = function (obj) { return up(this, obj) }
   Elem.prototype.update({
     xmlns: "http://www.w3.org/1999/xhtml",
     addTo: function (parent) {
@@ -187,8 +187,8 @@
       });
       return this;
     },
-    trigger: function (type, data) {
-      this.node.dispatchEvent(new CustomEvent(type, {detail: data}));
+    trigger: function (type, data, opts) {
+      this.node.dispatchEvent(new CustomEvent(type, up({detail: data}, opts)));
       return this;
     },
     upon: function (types, fun, capture) {
