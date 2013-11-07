@@ -137,6 +137,9 @@
       p.appendChild(this.node);
       return this;
     },
+    append: function (child) {
+      return child.addTo(this) && this;
+    },
     child: function (elem, attrs, props) {
       return new this.constructor(elem, attrs, props).addTo(this);
     },
