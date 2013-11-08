@@ -102,10 +102,14 @@
       }
     },
     keydrop: function (list, val, key) {
-      return list.splice(Sun.lists.keyindex(list, val, key), 1)[0];
+      var i = Sun.lists.keyindex(list, val, key);
+      if (i >= 0)
+        return list.splice(i, 1)[0];
     },
     keyfind: function (list, val, key) {
-      return list[Sun.lists.keyindex(list, val, key)];
+      var i = Sun.lists.keyindex(list, val, key);
+      if (i >= 0)
+        return list[i];
     },
     values: function (obj) {
       var vals = [];
