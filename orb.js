@@ -193,9 +193,14 @@
   Sky.SVGElem.prototype.update({
     dolly: Orb.type(function Dolly(elem, jack, opts) {
       var opts = up({}, opts);
-      var bbox = opts.bbox || {}, vbox = opts.vbox || elem.node.getBBox();
-      var xmin = def(bbox.x, -Infinity), xmax = def(bbox.x + bbox.width - vbox.width, Infinity);
-      var ymin = def(bbox.y, -Infinity), ymax = def(bbox.y + bbox.height - vbox.height, Infinity);
+      var vbox = opts.vbox || elem.node.getBBox();
+      var xmin, xmax, ymin, ymax;
+      var setBBox = this.setBBox = function (bbox) {
+        var b = bbox || {};
+        xmin = def(b.x, -Infinity); xmax = def(b.x + b.width - vbox.width, Infinity);
+        ymin = def(b.y, -Infinity); ymax = def(b.y + b.height - vbox.height, Infinity);
+      }
+      setBBox(opts.bbox);
 
       this.elem = elem.attrs({viewBox: [vbox.x, vbox.y, vbox.width, vbox.height]});
       this.jack = jack;
@@ -209,9 +214,13 @@
     }),
     wagon: Orb.type(function Wagon(elem, jack, opts) {
       var opts = up({}, opts);
-      var bbox = opts.bbox || {};
-      var xmin = def(bbox.x, -Infinity), xmax = def(bbox.x + bbox.width, Infinity);
-      var ymin = def(bbox.y, -Infinity), ymax = def(bbox.y + bbox.height, Infinity);
+      var xmin, xmax, ymin, ymax;
+      var setBBox = this.setBBox = function (bbox) {
+        var b = bbox || {};
+        xmin = def(b.x, -Infinity); xmax = def(b.x + b.width, Infinity);
+        ymin = def(b.y, -Infinity); ymax = def(b.y + b.height, Infinity);
+      }
+      setBBox(opts.bbox);
 
       this.elem = elem;
       this.jack = jack;

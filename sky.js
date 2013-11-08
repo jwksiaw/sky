@@ -265,8 +265,7 @@
       return this.node.tagName == 'svg' ? this : new SVGElem(this.node.ownerSVGElement);
     },
     fit: function () {
-      var box = this.node.getBBox();
-      return this.enc().attrs({viewBox: [box.x, box.y, box.width, box.height]});
+      return this.enc().attrs({viewBox: this.bbox()});
     },
     href: function (href) {
       return this.attrs({href: href}, this.xlink);
