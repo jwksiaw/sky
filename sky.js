@@ -2,6 +2,7 @@
   var def = function (x, d) { return isNaN(x) ? d : x }
   var get = function (a, k, d) { var v = a[k]; return v == undefined ? d : v }
   var pop = function (a, k, d) { var v = get(a, k, d); delete a[k]; return v }
+  var pre = function (a, k, d) { return a[k] = get(a, k, d) }
   var up = function (a, b) {
     for (var k in b)
       a[k] = b[k];
@@ -12,6 +13,7 @@
     def: def,
     get: get,
     pop: pop,
+    pre: pre,
     update: up,
     copy: function (b) { return up({}, b) },
     clip: function (x, m, M) { return Math.min(Math.max(x, m), M) },
