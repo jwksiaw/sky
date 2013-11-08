@@ -94,20 +94,21 @@
           return list.splice(i, 0, item) && list;
       return list.push(item) && list;
     },
-    keyindex: function (list, val, key) {
+    keyindex: function (list, val, key, eq) {
+      var eq = eq || function (a, b) { return a <= b && a >= b }
       for (var i = 0, k = key || 0; i < list.length; i++) {
         var v = list[i][k];
-        if (v <= val && v >= val)
+        if (eq(v, val))
           return i;
       }
     },
-    keydrop: function (list, val, key) {
-      var i = Sun.lists.keyindex(list, val, key);
+    keydrop: function (list, val, key, eq) {
+      var i = Sun.lists.keyindex(list, val, key, eq);
       if (i >= 0)
         return list.splice(i, 1)[0];
     },
-    keyfind: function (list, val, key) {
-      var i = Sun.lists.keyindex(list, val, key);
+    keyfind: function (list, val, key, eq) {
+      var i = Sun.lists.keyindex(list, val, key, eq);
       if (i >= 0)
         return list[i];
     },
