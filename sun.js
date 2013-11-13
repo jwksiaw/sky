@@ -116,6 +116,12 @@
       if (i >= 0)
         return list[i];
     },
+    keystore: function (list, val, rep, key, eq) {
+      var i = Sun.lists.keyindex(list, val, key, eq);
+      if (i >= 0)
+        return list[i] = rep;
+      return list.push(rep) && rep;
+    },
     values: function (obj) {
       var vals = [];
       for (var k in obj)
