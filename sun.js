@@ -1,5 +1,7 @@
 (function () {
   var int = function (x) { return parseInt(x, 10) }
+  var max = function (x, y) { return x > y ? x : y }
+  var min = function (x, y) { return x < y ? x : y }
   var mod = function (x, y) {
     var r = x % y;
     return r < 0 ? r + y : r;
@@ -13,6 +15,8 @@
 
   Sun = {
     int: int,
+    max: max,
+    min: min,
     mod: mod,
     pad: pad,
     ellipsis: function (text, n) {
