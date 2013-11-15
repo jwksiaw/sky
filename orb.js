@@ -43,7 +43,7 @@
   Sky.Elem.prototype.update({
     tap: function (fun, opts) {
       var opts = up({gap: 250}, opts);
-      var open;
+      var self = this, open;
       this.on('mousedown touchstart', function (e) {
         open = true;
         setTimeout(function () { open = false }, opts.gap);
@@ -51,17 +51,17 @@
       });
       this.on('mouseup touchend', function (e) {
         if (open)
-          fun && fun();
+          fun && fun.apply(self, arguments);
         e.preventDefault();
       });
       return this;
     },
     dbltap: function (fun, opts) {
       var opts = up({gap: 250}, opts);
-      var taps = 0;
+      var self= this, taps = 0;
       this.on('mouseup touchend', function (e) {
         if (taps++)
-          fun && fun();
+          fun && fun.apply(self, arguments);
         setTimeout(function () { taps = 0 }, opts.gap);
         e.preventDefault();
       });
