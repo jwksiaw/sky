@@ -19,6 +19,9 @@
     min: min,
     mod: mod,
     pad: pad,
+    clockdist: function (a, b, c) {
+      return min(mod(a - b, c || 24), mod(b - a, c || 24));
+    },
     ellipsis: function (text, n) {
       if (n && text.length > n + 3)
         return text.substr(0, n) + '\u2026';
