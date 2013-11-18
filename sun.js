@@ -64,7 +64,7 @@
     }
   }
 
-  Sun.http = Sun.up(function (method, url, fun, data, hdrs) {
+  var H = Sun.http = Sun.up(function (method, url, fun, data, hdrs) {
     var req = new XMLHttpRequest();
     req.onreadystatechange = function () {
       if (this.readyState == this.DONE){
@@ -76,12 +76,12 @@
     req.send(data);
     return req;
   }, {
-    get:  function (url, fun, hdrs)       { return Sun.http("GET",  url, fun, null, hdrs) },
-    put:  function (url, fun, data, hdrs) { return Sun.http("PUT",  url, fun, data, hdrs) },
-    post: function (url, fun, data, hdrs) { return Sun.http("POST", url, fun, data, hdrs) }
+    get:  function (url, fun, hdrs)       { return H("GET",  url, fun, null, hdrs) },
+    put:  function (url, fun, data, hdrs) { return H("PUT",  url, fun, data, hdrs) },
+    post: function (url, fun, data, hdrs) { return H("POST", url, fun, data, hdrs) }
   });
 
-  Sun.lists = {
+  var L = Sun.lists = {
     groupby: function (list, key) {
       var k, key = key || function (item) { return item[0] }
       return list.reduce(function (acc, item) {
@@ -110,17 +110,17 @@
       }
     },
     keydrop: function (list, val, key, eq) {
-      var i = Sun.lists.keyindex(list, val, key, eq);
+      var i = L.keyindex(list, val, key, eq);
       if (i >= 0)
         return list.splice(i, 1)[0];
     },
     keyfind: function (list, val, key, eq) {
-      var i = Sun.lists.keyindex(list, val, key, eq);
+      var i = L.keyindex(list, val, key, eq);
       if (i >= 0)
         return list[i];
     },
     keystore: function (list, val, rep, key, eq) {
-      var i = Sun.lists.keyindex(list, val, key, eq);
+      var i = L.keyindex(list, val, key, eq);
       if (i >= 0)
         return list[i] = rep;
       return list.push(rep) && rep;
@@ -136,62 +136,65 @@
   var Sec = 1000, Min = 60 * Sec, Hour = 60 * Min, Day = 24 * Hour, Week = 7 * Day;
   var DoW = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
   var MoY = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-  Sun.time = Sun.up(function (set, rel) {
-      var rel = rel ? new Date(rel) : new Date, set = set || {};
-      return new Date(set.y == undefined ? rel.getFullYear() : set.y,
-                      set.m == undefined ? rel.getMonth() : set.m,
-                      set.d == undefined ? rel.getDate() : set.d,
-                      set.h == undefined ? rel.getHours() : set.h,
-                      set.mi == undefined ? rel.getMinutes() : set.mi,
-                      set.s == undefined ? rel.getSeconds() : set.s,
-                      set.ms == undefined ? rel.getMilliseconds() : set.ms);
-    }, {
-      pass: function (dif, rel) {
-        var rel = rel ? new Date(rel) : new Date;
-        for (var k in dif)
-          switch (k) {
-            case 'y': rel.setFullYear(rel.getFullYear() + dif[k]); break;
-            case 'm': rel.setMonth(rel.getMonth() + dif[k]); break;
-            case 'd': rel.setDate(rel.getDate() + dif[k]); break;
-            case 'h': rel.setHours(rel.getHours() + dif[k]); break;
-            case 'mi': rel.setMinutes(rel.getMinutes() + dif[k]); break;
-            case 's': rel.setSeconds(rel.getSeconds() + dif[k]); break;
-            case 'ms': rel.setMilliseconds(rel.getMilliseconds() + dif[k]); break;
-          }
-        return rel;
-      },
-      fold: function (fun, acc, opt) {
-        var t = opt.start || new Date, stop = opt.stop, step = opt.step || {d: 1};
-        var f = Sun.time.pass(step, t) >= t;
-        for ( ; !stop || (f ? (t < stop) : (t > stop)); t = Sun.time.pass(step, t))
-          acc = fun(acc, t);
-        return acc;
-      },
-      parse: function (stamp, opt) {
-        var opt = opt || {};
-        var sep = opt.sep || 'T', dsep = opt.dsep || '-', tsep = opt.tsep || ':';
-        var utc = opt.utc || stamp[stamp.length - 1] == 'Z';
-        var dtp = stamp.split(sep);
-        var datep = dtp[0] ? dtp[0].split(dsep).map(int) : [0, 0, 0];
-        var timep = dtp[1] ? dtp[1].substring(0, 8).split(':').map(int) : [0, 0, 0];
-        if (utc)
-          return new Date(Date.UTC(datep[0], datep[1] - 1, datep[2], timep[0], timep[1], timep[2]));
-        return new Date(datep[0], datep[1] - 1, datep[2], timep[0], timep[1], timep[2]);
-      },
-      stamp: function (t) {
-        return (pad(t.getFullYear()) + '/' + pad(t.getMonth() + 1) + '/' + pad(t.getDate()) + ' ' +
-                pad(t.getHours()) + ':' + pad(t.getSeconds()) + ':' + pad(t.getMinutes()));
-      },
-      fromGregorian: function (s) { return new Date((s - 62167219200) * 1000) },
-      toGregorian: function (t) { return ~~(t / 1000) + 62167219200 },
-      weekday: function (t) { return DoW[t.getDay()] },
-      month: function (t) { return MoY[t.getMonth()] },
-      DoW: DoW,
-      MoY: MoY,
-      Sec: Sec,
-      Min: Min,
-      Hour: Hour,
-      Day: Day,
-      Week: Week
-    });
+  var T = Sun.time = Sun.up(function (set, rel) {
+    var rel = rel ? new Date(rel) : new Date, set = set || {};
+    return new Date(set.y == undefined ? rel.getFullYear() : set.y,
+                    set.m == undefined ? rel.getMonth() : set.m,
+                    set.d == undefined ? rel.getDate() : set.d,
+                    set.h == undefined ? rel.getHours() : set.h,
+                    set.mi == undefined ? rel.getMinutes() : set.mi,
+                    set.s == undefined ? rel.getSeconds() : set.s,
+                    set.ms == undefined ? rel.getMilliseconds() : set.ms);
+  }, {
+    pass: function (dif, rel) {
+      var rel = rel ? new Date(rel) : new Date;
+      for (var k in dif)
+        switch (k) {
+        case 'y': rel.setFullYear(rel.getFullYear() + dif[k]); break;
+        case 'm': rel.setMonth(rel.getMonth() + dif[k]); break;
+        case 'd': rel.setDate(rel.getDate() + dif[k]); break;
+        case 'h': rel.setHours(rel.getHours() + dif[k]); break;
+        case 'mi': rel.setMinutes(rel.getMinutes() + dif[k]); break;
+        case 's': rel.setSeconds(rel.getSeconds() + dif[k]); break;
+        case 'ms': rel.setMilliseconds(rel.getMilliseconds() + dif[k]); break;
+        }
+      return rel;
+    },
+    fold: function (fun, acc, opt) {
+      var t = opt.start || new Date, stop = opt.stop, step = opt.step || {d: 1};
+      var f = T.pass(step, t) >= t;
+      for ( ; !stop || (f ? (t < stop) : (t > stop)); t = T.pass(step, t))
+        acc = fun(acc, t);
+      return acc;
+    },
+    parse: function (stamp, opt) {
+      var opt = opt || {};
+      var sep = opt.sep || 'T', dsep = opt.dsep || '-', tsep = opt.tsep || ':';
+      var utc = opt.utc || stamp[stamp.length - 1] == 'Z';
+      var dtp = stamp.split(sep);
+      var datep = dtp[0] ? dtp[0].split(dsep).map(int) : [0, 0, 0];
+      var timep = dtp[1] ? dtp[1].substring(0, 8).split(':').map(int) : [0, 0, 0];
+      if (utc)
+        return new Date(Date.UTC(datep[0], datep[1] - 1, datep[2], timep[0], timep[1], timep[2]));
+      return new Date(datep[0], datep[1] - 1, datep[2], timep[0], timep[1], timep[2]);
+    },
+    datestamp: function (t) {
+      return t.getFullYear() + '/' + pad(t.getMonth() + 1) + '/' + pad(t.getDate());
+    },
+    timestamp: function (t) {
+      return pad(t.getHours()) + ':' + pad(t.getSeconds()) + ':' + pad(t.getMinutes());
+    },
+    stamp: function (t) { return T.datestamp(t) + ' ' + T.timestamp(t) },
+    fromGregorian: function (s) { return new Date((s - 62167219200) * 1000) },
+    toGregorian: function (t) { return ~~(t / 1000) + 62167219200 },
+    weekday: function (t) { return DoW[t.getDay()] },
+    month: function (t) { return MoY[t.getMonth()] },
+    DoW: DoW,
+    MoY: MoY,
+    Sec: Sec,
+    Min: Min,
+    Hour: Hour,
+    Day: Day,
+    Week: Week
+  });
 })();
