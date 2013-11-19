@@ -19,6 +19,23 @@
     min: min,
     mod: mod,
     pad: pad,
+    nchoosek: function (n, k) {
+      var c = 1, d = 1;
+      for (var i = n; i > k; i--) {
+        c *= i;
+        d *= n - i + 1;
+      }
+      return c / d;
+    },
+    bezier: function (t, P) {
+      var n = P.length - 1, x = 0, y = 0;
+      for (i = 0; i <= n; i++) {
+        var p = P[i], w = nchoosek(n, i) * Math.pow(1 - t, n - i) * Math.pow(t, i);
+        x += w * (p[0] || 0);
+        y += w * (p[1] || 0);
+      }
+      return [x, y];
+    },
     clockdist: function (a, b, c) {
       return min(mod(a - b, c || 24), mod(b - a, c || 24));
     },
