@@ -54,6 +54,9 @@
         acc = fun(acc, [k, obj[k]], i++, obj);
       return acc;
     },
+    format: function (fmt, arg) {
+      return fmt.replace(/{(.*?)}/g, function(m, k) { return k in arg ? arg[k] : m });
+    },
     repeat: function (fun, every) {
       return fun() || setTimeout(function () {
         fun() || setTimeout(arguments.callee, every);

@@ -155,9 +155,10 @@
     spring: Orb.type(function Spring(elem, jack, opts) {
       var opts = up({}, opts);
       var kx = opts.kx || 8, ky = opts.ky || 8;
+      var tx = opts.tx || 1, ty = opts.ty || 1;
       var restore = opts.restore || function (dx, dy, mx, my) {
-        if (mx > 1) dx /= kx * log(mx + 1);
-        if (my > 1) dy /= ky * log(my + 1);
+        if (mx > tx) dx /= kx * log(mx + 1);
+        if (my > ty) dy /= ky * log(my + 1);
         this.dx -= dx;
         this.dy -= dy;
         return this.push(dx, dy, this);
