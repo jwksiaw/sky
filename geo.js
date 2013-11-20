@@ -40,7 +40,7 @@
       var dims = this.dims = opts.dims || parent.bbox();
 
       var s = opts.size, mts = opts.mts;
-      var c = dims.w / s, r = dims.h / s, C = Math.ceil(c) + 2, R = Math.ceil(r) + 2;
+      var c = dims.width / s, r = dims.height / s, C = Math.ceil(c) + 2, R = Math.ceil(r) + 2;
       var p = mts.project(opts.center, opts.zoom);
       var x = p[0], y = p[1], z = p[2];
       var box = Sky.box(x - C / 2, y - R / 2, C, R);
@@ -68,7 +68,7 @@
       }
 
       this.goto = function (l) {
-        var d = mts.project(l, z);
+        var d = mts.project(l || opts.center, z);
         Orb.move(this, d[0] - x, d[1] - y);
       }
 
