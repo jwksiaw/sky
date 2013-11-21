@@ -116,7 +116,11 @@
           acc = fun(acc, new Box({x: x + w * j, y: y + h * i, w: w, h: h}), i, j, n, this);
       return acc;
     },
-    toString: function () { return this.x + ',' + this.y + ',' + this.w + ',' + this.h }
+    scale: function (a, b) {
+      var w = a * this.w, h = def(b, a) * this.h;
+      return new Box({x: this.midX - w / 2, y: this.midY - h / 2, w: w, h: h});
+    },
+    toString: function () { with (this) return x + ',' + y + ',' + w + ',' + h }
   };
 
   function RGB(d) { up(this, d) }
