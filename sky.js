@@ -200,6 +200,10 @@
       var f = function (e) { return fun.call(this, e, e.detail) }
       return this.on(types, f, capture) && f;
     },
+    root: function () {
+      for (var n = this.node; n.parentNode; n = n.parentNode);
+      return n;
+    },
     doc: function () {
       return this.node instanceof Document ? this : new Elem(this.node.ownerDocument);
     },
