@@ -47,20 +47,16 @@
       var open = open || path.M;
       return open([x1, y1]) + path.L([x2, y2]);
     },
+    rect: function (x, y, w, h, open) {
+      var open = open || path.M;
+      var h = def(h, w);
+      return open([x, y]) + path('H', x + w) + path('V', y + h) + path('H', x) + 'Z';
+    },
     triangle: function (cx, cy, b, h, open) {
       var open = open || path.M;
       var h = def(h, b);
       var x = cx - b / 2, y = cy - h / 2;
       return open([x, y]) + path('L', cx, y + h) + path('L', x + b, y) + 'Z';
-    },
-    frame: function (cx, cy, w, h, open) {
-      var h = def(h, w);
-      return path.rect(cx - w / 2, cy - h / 2, w, h, open);
-    },
-    rect: function (x, y, w, h, open) {
-      var open = open || path.M;
-      var h = def(h, w);
-      return open([x, y]) + path('H', x + w) + path('V', y + h) + path('H', x) + 'Z';
     },
     arc: function (cx, cy, rx, ry, len, off, open) {
       var open = open || path.M;
@@ -116,10 +112,14 @@
           acc = fun(acc, new Box({x: x + w * j, y: y + h * i, w: w, h: h}), i, j, n, this);
       return acc;
     },
+    center: function (cx, cy) {
+      return new Box({x: cx - this.w / 2, y: cy - this.h / 2, w: this.w, h: this.h});
+    },
     scale: function (a, b) {
       var w = a * this.w, h = def(b, a) * this.h;
       return new Box({x: this.midX - w / 2, y: this.midY - h / 2, w: w, h: h});
     },
+    rect: function (elem) { with (this) return elem.rect(x, y, w, h) },
     toString: function () { with (this) return x + ',' + y + ',' + w + ',' + h }
   };
 
@@ -231,9 +231,6 @@
     },
     line: function (x1, y1, x2, y2) {
       return this.child('line', {x1: x1, y1: y1, x2: x2, y2: y2});
-    },
-    frame: function (cx, cy, w, h) {
-      return this.rect(cx - w / 2, cy - h / 2, w, h);
     },
     rect: function (x, y, w, h) {
       return this.child('rect', {x: x, y: y, width: w, height: h});
