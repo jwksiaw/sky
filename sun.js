@@ -184,9 +184,13 @@
     },
     fold: function (fun, acc, opt) {
       var t = opt.start || new Date, stop = opt.stop, step = opt.step || {d: 1};
-      var f = T.pass(step, t) >= t;
-      for ( ; !stop || (f ? (t < stop) : (t > stop)); t = T.pass(step, t))
+      var f = T.pass(step, t) >= t, jump = {};
+      for (var i = 0, s = t; !stop || (f ? (t < stop) : (t > stop)); i++) {
         acc = fun(acc, t);
+        for (var k in step)
+          jump[k] = step[k] * i;
+        t = T.pass(jump, s)
+      }
       return acc;
     },
     parse: function (stamp, opt) {
