@@ -104,6 +104,7 @@
   });
 
   var L = Sun.lists = {
+    append: function (list, item) { return list.push(item) && list },
     groupby: function (list, key) {
       var k, key = key || function (item) { return item[0] }
       return list.reduce(function (acc, item) {
