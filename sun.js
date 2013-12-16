@@ -169,6 +169,18 @@
                     set.s == undefined ? rel.getSeconds() : set.s,
                     set.ms == undefined ? rel.getMilliseconds() : set.ms);
   }, {
+    get: function (k, rel) {
+      var rel = rel ? new Date(rel) : new Date;
+      switch (k) {
+        case 'y': return rel.getFullYear();
+        case 'm': return rel.getMonth();
+        case 'd': return rel.getDate();
+        case 'h': return rel.getHours();
+        case 'mi': return rel.getMinutes();
+        case 's': return rel.getSeconds();
+        case 'ms': return rel.getMilliseconds();
+      }
+    },
     pass: function (dif, rel) {
       var rel = rel ? new Date(rel) : new Date;
       for (var k in dif)
@@ -214,6 +226,8 @@
     stamp: function (t) { return T.datestamp(t) + ' ' + T.timestamp(t) },
     fromGregorian: function (s) { return new Date((s - 62167219200) * 1000) },
     toGregorian: function (t) { return ~~(t / 1000) + 62167219200 },
+    daysInMonth: function (y, m) { return 32 - new Date(y, m, 32).getDate() },
+    isLeapYear: function (y) { return !(y % 4) && ((y % 100) != 0 || !(y % 400)) },
     weekday: function (t) { return DoW[t.getDay()] },
     month: function (t) { return MoY[t.getMonth()] },
     DoW: DoW,
