@@ -151,6 +151,23 @@
         return list[i] = rep;
       return list.push(rep) && rep;
     },
+    umerge: function (x, y, lt) {
+      var lt = lt || function (a, b) { return a < b }
+      var z = [], i = 0, j = 0, l;
+      while (i < x.length || j < y.length) {
+        if (j >= y.length || lt(x[i], y[j])) {
+          if (lt(l, x[i]) || !(i || j))
+            z.push(l = x[i]);
+          i++;
+        }
+        else {
+          if (lt(l, y[j]) || !(i || j))
+            z.push(l = y[j]);
+          j++;
+        }
+      }
+      return z;
+    },
     values: function (obj) {
       var vals = [];
       for (var k in obj)
