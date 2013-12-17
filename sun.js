@@ -57,6 +57,9 @@
     format: function (fmt, arg) {
       return fmt.replace(/{(.*?)}/g, function(m, k) { return k in arg ? arg[k] : m });
     },
+    object: function (iter) {
+      return Sun.fold(function (o, i) { return (o[i[0]] = i[1]), o }, {}, iter);
+    },
     repeat: function (fun, every) {
       return fun() || setTimeout(function () {
         fun() || setTimeout(arguments.callee, every);
@@ -187,6 +190,7 @@
         switch (k) {
         case 'y': rel.setFullYear(rel.getFullYear() + dif[k]); break;
         case 'm': rel.setMonth(rel.getMonth() + dif[k]); break;
+        case 'w': rel.setDate(rel.getDate() + dif[k] * 7); break;
         case 'd': rel.setDate(rel.getDate() + dif[k]); break;
         case 'h': rel.setHours(rel.getHours() + dif[k]); break;
         case 'mi': rel.setMinutes(rel.getMinutes() + dif[k]); break;
