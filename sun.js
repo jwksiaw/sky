@@ -221,7 +221,7 @@
     fold: function (fun, acc, opt) {
       var t = opt.start || new Date, stop = opt.stop, step = opt.step || {d: 1};
       var f = T.pass(step, t) >= t, jump = {};
-      for (var i = 0, s = t; !stop || (f ? (t < stop) : (t > stop)); i++) {
+      for (var i = 1, s = t; !stop || (f ? (t < stop) : (t > stop)); i++) {
         acc = fun(acc, t);
         for (var k in step)
           jump[k] = step[k] * i;
