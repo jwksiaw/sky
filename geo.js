@@ -38,32 +38,42 @@
     map: Orb.type(function Map(parent, jack, opts) {
       var opts = this.opts = up({center: {lat: 0, lng: 0}, zoom: 3, size: 256}, opts);
       var dims = this.dims = opts.dims || parent.bbox();
+      var self = this, loops = [], overlay = [], markers = [];
+      var elem = this.elem = parent.g(), tiles = elem.g();
+      var jack = this.jack = [loops, markers];
 
       var s = opts.size, mts = opts.mts;
       var c = dims.width / s, r = dims.height / s, C = Math.ceil(c) + 2, R = Math.ceil(r) + 2;
       var p = mts.project(opts.center, opts.zoom);
       var x = p[0], y = p[1], z = p[2];
-      var box = Sky.box(x - C / 2, y - R / 2, C, R);
 
-      var self = this;
-      var elem = this.elem = parent.g().transform({scale: s, translate: [-(x - c / 2), -(y - r / 2)]})
-      var jack = this.jack = box.grid(function (a, b, i, j) {
-        var m = 0, n = 0;
-        var tile = elem.g().transform({translate: [~~b.x, ~~b.y]});
-        var img = tile.image(mts.tile(b.x, b.y, z)).xywh(0, 0, b.w, b.h);
-        var loop = tile.loop(null, {
-          bbox: box,
-          wrap: function (wx, wy) {
-            img.href(mts.tile(b.x + (m += wx * C), b.y + (n += wy * R), z));
-          }
+      var draw = function (x, y, z) {
+        var box = Sky.box(x - C / 2, y - R / 2, C, R);
+        elem.transform({scale: s, translate: [-(x - c / 2), -(y - r / 2)]})
+        tiles.clear();
+        overlay.map(function (o) {
+          var t = mts.project(o[0], z).slice(0, 2);
+          var g = o[1].transform({translate: t, scale: 1 / s});
         });
-        return a.push(tile.wagon(loop)), a;
-      }, [], {rows: R, cols: C});
+        return box.grid(function (a, b, i, j, k) {
+          var m = 0, n = 0;
+          var tile = tiles.g().transform({translate: [~~b.x, ~~b.y]});
+          var img = tile.image(mts.tile(b.x, b.y, z)).xywh(0, 0, b.w, b.h);
+          var loop = tile.loop(null, {
+            bbox: box,
+            wrap: function (wx, wy) {
+              img.href(mts.tile(b.x + (m += wx * C), b.y + (n += wy * R), z));
+            }
+          });
+          return (a[k] = tile.wagon(loop)), a;
+        }, loops, {rows: R, cols: C})
+      }
+      draw(x, y, z);
 
       this.move = function (dx, dy) {
         var sx = dx / s, sy = dy / s;
-        x += sx;
-        y += sy;
+        x -= sx;
+        y -= sy;
         Orb.move(jack, sx, sy);
       }
 
@@ -72,11 +82,19 @@
         Orb.move(this, d[0] - x, d[1] - y);
       }
 
+      this.zoom = function (dz) {
+        var dk = Math.pow(1 << Math.abs(dz), Sun.sgn(dz));
+        draw(x *= dk, y *= dk, z += dz);
+      }
+
       this.add = function (f, l) {
-        var t = mts.project(l || opts.center, z).slice(0, 2);
-        var o = f.call(self, elem.g().transform({translate: t, scale: 1 / s}));
+        var l = l || opts.center;
+        var t = mts.project(l, z).slice(0, 2);
+        var g = elem.g().transform({translate: t, scale: 1 / s});
+        var o = f.call(self, g);
+        overlay.push([l, g]);
         if (o)
-          jack.push(o);
+          markers.push(o);
         return o;
       }
 

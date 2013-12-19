@@ -1,5 +1,6 @@
 (function () {
   var int = function (x) { return parseInt(x, 10) }
+  var sgn = function (x) { return x < 0 ? -1 : 1 }
   var max = function (x, y) { return x > y ? x : y }
   var min = function (x, y) { return x < y ? x : y }
   var mod = function (x, y) {
@@ -32,6 +33,7 @@
 
   Sun = {
     int: int,
+    sgn: sgn,
     max: max,
     min: min,
     mod: mod,
