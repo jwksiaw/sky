@@ -204,6 +204,19 @@
       var f = function (e) { return fun.call(this, e, e.detail) }
       return this.on(types, f, capture) && f;
     },
+    once: function (types, fun) {
+      var n = 0;
+      return this.til(types, fun, function () { return n++ });
+    },
+    til: function (types, fun, dead) {
+      var self = this;
+      self.on(types, function () {
+        if (dead())
+          self.off(types, arguments.callee);
+        else
+          fun.apply(this, arguments);
+      });
+    },
     root: function () {
       for (var n = this.node; n.parentNode; n = n.parentNode);
       return n;
