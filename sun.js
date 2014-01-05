@@ -82,7 +82,7 @@
       return list.join('&');
     },
     decode: function (str) {
-      var list = str.split('&');
+      var list = str ? str.split('&') : [];
       return list.reduce(function (acc, item) {
         var kv = item.split('=').map(decodeURIComponent);
         acc[kv[0]] = kv[1];
