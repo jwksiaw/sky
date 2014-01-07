@@ -112,6 +112,9 @@
           acc = fun(acc, new Box({x: x + w * j, y: y + h * i, w: w, h: h}), i, j, n, this);
       return acc;
     },
+    split: function (opts) {
+      return this.grid(function (acc, tile) { return acc.push(tile), acc }, [], opts);
+    },
     center: function (cx, cy) {
       return new Box({x: cx - this.w / 2, y: cy - this.h / 2, w: this.w, h: this.h});
     },
