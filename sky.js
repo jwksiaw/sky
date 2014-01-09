@@ -17,20 +17,11 @@
     update: up,
     copy: function (b) { return up({}, b) },
     clip: function (x, m, M) { return Math.min(Math.max(x, m), M) },
-    mix: function (x, opts) {
-      var o = up({min: 0, max: 100, lo: {b: 100}, hi: {r: 100}}, opts);
-      var m = o.min, M = o.max, lo = o.lo, hi = o.hi;
-      function w(a, b) { return ((b || 0) * Math.max(x - m, 0) + (a || 0) * Math.max(M - x, 0)) / (M - m) }
-      function i(a, b) { return Math.round(w(a, b)) }
-      if (lo.a == undefined && hi.a == undefined)
-        return new RGB({r: i(lo.r, hi.r), g: i(lo.g, hi.g), b: i(lo.b, hi.b)});
-      return new RGB({r: i(lo.r, hi.r), g: i(lo.g, hi.g), b: i(lo.b, hi.b), a: w(lo.a, hi.a)});
-    }
+    randInt: function (m, M) { return Math.round((M - m) * Math.random()) + m }
   }
 
   var trig = util.trig = {
-    DtR: Math.PI / 180,
-    rad: function (a) { return trig.DtR * a },
+    rad: function (a) { return Math.PI / 180 * a },
     sin: function (a) { return Math.sin(trig.rad(a)) },
     cos: function (a) { return Math.cos(trig.rad(a)) },
     cut: function (x) { return util.clip(x, -359.999, 359.999) }
@@ -41,51 +32,51 @@
     M: function (xy) { return path('M', xy) },
     L: function (xy) { return path('L', xy) },
     join: function () {
-      return [].reduce.call(arguments, function (d, a) { return d + path.apply(null, a) }, '');
+      return [].reduce.call(arguments, function (d, a) { return d + path.apply(null, a) }, '')
     },
     line: function (x1, y1, x2, y2) {
       var open = open || path.M;
-      return open([x1, y1]) + path.L([x2, y2]);
+      return open([x1, y1]) + path.L([x2, y2])
     },
     rect: function (x, y, w, h, open) {
       var open = open || path.M;
-      var h = def(h, w);
+      var h = def(h, w)
       return open([x, y]) + path('H', x + w) + path('V', y + h) + path('H', x) + 'Z';
     },
     triangle: function (cx, cy, b, h, open) {
       var open = open || path.M;
-      var h = def(h, b);
+      var h = def(h, b)
       var x = cx - b / 2, y = cy - h / 2;
       return open([x, y]) + path('L', cx, y + h) + path('L', x + b, y) + 'Z';
     },
     arc: function (cx, cy, rx, ry, len, off, open) {
       var open = open || path.M;
       var len = trig.cut(def(len, 360)), off = off || 0;
-      var ix = cx + rx * trig.cos(off), iy = cy + ry * trig.sin(off);
-      var fx = cx + rx * trig.cos(off + len), fy = cy + ry * trig.sin(off + len);
+      var ix = cx + rx * trig.cos(off), iy = cy + ry * trig.sin(off)
+      var fx = cx + rx * trig.cos(off + len), fy = cy + ry * trig.sin(off + len)
       return (open([ix, iy]) +
               path('A',
                    rx, ry, 0,
                    Math.abs(len) > 180 ? 1 : 0,
                    len > 0 ? 1 : 0,
-                   fx, fy));
+                   fx, fy))
     },
     oval: function (cx, cy, rx, ry, open) {
-      var ry = def(ry, rx);
-      return path.arc(cx, cy, rx, ry, 360, 0, open);
+      var ry = def(ry, rx)
+      return path.arc(cx, cy, rx, ry, 360, 0, open)
     },
     arch: function (cx, cy, rx, ry, t, len, off, open) {
       var len = trig.cut(def(len, 360)), off = off || 0;
-      var t = def(t, 1);
+      var t = def(t, 1)
       return (path.arc(cx, cy, rx, ry, len, off, open) +
-              path.arc(cx, cy, rx + t, ry + t, -len, off + len, path.L) + 'Z');
+              path.arc(cx, cy, rx + t, ry + t, -len, off + len, path.L) + 'Z')
     },
     ring: function (cx, cy, rx, ry, t, open) {
-      var t = def(t, 1);
+      var t = def(t, 1)
       return (path.arc(cx, cy, rx, ry, 360, 0, open) +
-              path.arc(cx, cy, rx + t, ry + t, -360, 360));
+              path.arc(cx, cy, rx + t, ry + t, -360, 360))
     }
-  });
+  })
 
   function Box(d) {
     this.x = d.x || 0;
@@ -104,29 +95,41 @@
     get right() { return this.x + this.w },
     get bottom() { return this.y + this.h },
     grid: function (fun, acc, opts) {
-      var o = up({rows: 1, cols: 1}, opts);
+      var o = up({rows: 1, cols: 1}, opts)
       var r = o.rows, c = o.cols;
       var x = this.x, y = this.y, w = this.w / c, h = this.h / r;
       for (var i = 0, n = 0; i < r; i++)
         for (var j = 0; j < c; j++, n++)
-          acc = fun(acc, new Box({x: x + w * j, y: y + h * i, w: w, h: h}), i, j, n, this);
+          acc = fun(acc, new Box({x: x + w * j, y: y + h * i, w: w, h: h}), i, j, n, this)
       return acc;
     },
     split: function (opts) {
-      return this.grid(function (acc, box) { return acc.push(box), acc }, [], opts);
+      return this.grid(function (acc, box) { return acc.push(box), acc }, [], opts)
     },
     center: function (cx, cy) {
-      return new Box({x: cx - this.w / 2, y: cy - this.h / 2, w: this.w, h: this.h});
+      return new Box({x: cx - this.w / 2, y: cy - this.h / 2, w: this.w, h: this.h})
     },
     scale: function (a, b) {
       var w = a * this.w, h = def(b, a) * this.h;
-      return new Box({x: this.midX - w / 2, y: this.midY - h / 2, w: w, h: h});
+      return new Box({x: this.midX - w / 2, y: this.midY - h / 2, w: w, h: h})
     },
     rect: function (elem) { with (this) return elem.rect(x, y, w, h) },
     toString: function () { with (this) return x + ',' + y + ',' + w + ',' + h }
   };
 
   function RGB(d) { up(this, d) }
+  RGB.mix = function (x, opts) {
+    var o = up({min: 0, max: 100, lo: {b: 100}, hi: {r: 100}}, opts)
+    var m = o.min, M = o.max, lo = o.lo, hi = o.hi;
+    function w(a, b) { return ((b || 0) * Math.max(x - m, 0) + (a || 0) * Math.max(M - x, 0)) / (M - m) }
+    function i(a, b) { return Math.round(w(a, b)) }
+    if (lo.a == undefined && hi.a == undefined)
+      return new RGB({r: i(lo.r, hi.r), g: i(lo.g, hi.g), b: i(lo.b, hi.b)})
+    return new RGB({r: i(lo.r, hi.r), g: i(lo.g, hi.g), b: i(lo.b, hi.b), a: w(lo.a, hi.a)})
+  }
+  RGB.random = function () {
+    return new RGB({r: util.randInt(0, 255), g: util.randInt(0, 255), b: util.randInt(0, 255)})
+  }
   RGB.prototype.toString = function () {
     if (this.a == undefined)
       return 'rgb(' + (this.r || 0) + ',' + (this.g || 0) + ',' + (this.b || 0) + ')';
@@ -134,33 +137,33 @@
   }
 
   function Elem(elem, attrs, props) {
-    this.node = elem instanceof Node ? elem : document.createElementNS(this.xmlns, elem);
-    this.attrs(attrs);
-    this.props(props);
+    this.node = elem instanceof Node ? elem : document.createElementNS(this.xmlns, elem)
+    this.attrs(attrs)
+    this.props(props)
   }
   Elem.prototype.update = function (obj) { return up(this, obj) }
   Elem.prototype.update({
     xmlns: "http://www.w3.org/1999/xhtml",
     addTo: function (parent) {
       var p = parent instanceof Node ? parent : parent.node;
-      p.appendChild(this.node);
+      p.appendChild(this.node)
       return this;
     },
     append: function (child) {
       return child.addTo(this) && this;
     },
     child: function (elem, attrs, props) {
-      return new this.constructor(elem, attrs, props).addTo(this);
+      return new this.constructor(elem, attrs, props).addTo(this)
     },
     clear: function () {
       var node = this.node;
       while (node.firstChild)
-        node.removeChild(node.firstChild);
+        node.removeChild(node.firstChild)
       return this;
     },
     attrs: function (attrs, ns) {
       for (var k in attrs)
-        this.node.setAttributeNS(ns || null, k, attrs[k]);
+        this.node.setAttributeNS(ns || null, k, attrs[k])
       return this;
     },
     props: function (props) {
@@ -177,30 +180,30 @@
       var self = this, i = 0;
       anim(function () {
         if (fun.call(self, self.node, i++) || i < n)
-          anim(arguments.callee);
-      });
+          anim(arguments.callee)
+      })
       return this;
     },
     remove: function () {
-      this.node.parentNode.removeChild(this.node);
+      this.node.parentNode.removeChild(this.node)
       return this;
     },
     on: function (types, fun, capture) {
       var node = this.node;
       types.split(/\s+/).map(function (type) {
-        node.addEventListener(type, fun, capture);
-      });
+        node.addEventListener(type, fun, capture)
+      })
       return this;
     },
     off: function (types, fun, capture) {
       var node = this.node;
       types.split(/\s+/).map(function (type) {
-        node.removeEventListener(type, fun, capture);
-      });
+        node.removeEventListener(type, fun, capture)
+      })
       return this;
     },
     trigger: function (type, data, opts) {
-      this.node.dispatchEvent(new CustomEvent(type, up({detail: data}, opts)));
+      this.node.dispatchEvent(new CustomEvent(type, up({detail: data}, opts)))
       return this;
     },
     upon: function (types, fun, capture) {
@@ -209,95 +212,95 @@
     },
     once: function (types, fun) {
       var n = 0;
-      return this.til(types, fun, function () { return n++ });
+      return this.til(types, fun, function () { return n++ })
     },
     til: function (types, fun, dead) {
       var self = this;
       self.on(types, function () {
         if (dead())
-          self.off(types, arguments.callee);
+          self.off(types, arguments.callee)
         else
-          fun.apply(this, arguments);
-      });
+          fun.apply(this, arguments)
+      })
     },
     root: function () {
-      for (var n = this.node; n.parentNode; n = n.parentNode);
+      for (var n = this.node; n.parentNode; n = n.parentNode)
       return n;
     },
     doc: function () {
-      return this.node instanceof Document ? this : new Elem(this.node.ownerDocument);
+      return this.node instanceof Document ? this : new Elem(this.node.ownerDocument)
     },
     txt: function (text) {
-      return this.props({textContent: text});
+      return this.props({textContent: text})
     }
-  });
+  })
 
   function SVGElem() {
-    Elem.apply(this, arguments);
+    Elem.apply(this, arguments)
   }
   SVGElem.prototype = new Elem().update({
     constructor: SVGElem,
     xmlns: "http://www.w3.org/2000/svg",
     xlink: "http://www.w3.org/1999/xlink",
     circle: function (cx, cy, r) {
-      return this.child('circle', {cx: cx, cy: cy, r: r});
+      return this.child('circle', {cx: cx, cy: cy, r: r})
     },
     ellipse: function (cx, cy, rx, ry) {
-      return this.child('ellipse', {cx: cx, cy: cy, rx: rx, ry: ry});
+      return this.child('ellipse', {cx: cx, cy: cy, rx: rx, ry: ry})
     },
     line: function (x1, y1, x2, y2) {
-      return this.child('line', {x1: x1, y1: y1, x2: x2, y2: y2});
+      return this.child('line', {x1: x1, y1: y1, x2: x2, y2: y2})
     },
     rect: function (x, y, w, h) {
-      return this.child('rect', {x: x, y: y, width: w, height: h});
+      return this.child('rect', {x: x, y: y, width: w, height: h})
     },
     path: function (d) {
-      return this.child('path', d && {d: d});
+      return this.child('path', d && {d: d})
     },
     text: function (x, y, text) {
-      return this.child('text', {x: x, y: y}, {textContent: text});
+      return this.child('text', {x: x, y: y}, {textContent: text})
     },
     tspan: function (text) {
-      return this.child('tspan', {}, {textContent: text});
+      return this.child('tspan', {}, {textContent: text})
     },
     polyline: function (points) {
-      return this.child('polyline', {points: points});
+      return this.child('polyline', {points: points})
     },
     polygon: function (points) {
-      return this.child('polygon', {points: points});
+      return this.child('polygon', {points: points})
     },
     g: function (attrs, props) {
-      return this.child('g', attrs, props);
+      return this.child('g', attrs, props)
     },
     image: function (href) {
-      return this.child('image').href(href);
+      return this.child('image').href(href)
     },
     link: function (href) {
-      return this.child('a').href(href);
+      return this.child('a').href(href)
     },
     use: function (href) {
-      return this.child('use').href(href);
+      return this.child('use').href(href)
     },
     svg: function (attrs, props) {
-      return this.child('svg', attrs, props);
+      return this.child('svg', attrs, props)
     },
     bbox: function () {
-      return new Box(this.node.getBBox());
+      return new Box(this.node.getBBox())
     },
     enc: function () {
-      return this.node.tagName == 'svg' ? this : new SVGElem(this.node.ownerSVGElement);
+      return this.node.tagName == 'svg' ? this : new SVGElem(this.node.ownerSVGElement)
     },
     fit: function () {
-      return this.enc().attrs({viewBox: this.bbox()});
+      return this.enc().attrs({viewBox: this.bbox()})
     },
     href: function (href) {
-      return this.attrs({href: href}, this.xlink);
+      return this.attrs({href: href}, this.xlink)
     },
     xywh: function (x, y, w, h) {
-      return this.attrs({x: x, y: y, width: w, height: h});
+      return this.attrs({x: x, y: y, width: w, height: h})
     },
     point: function (x, y) {
-      var p = this.enc().node.createSVGPoint();
+      var p = this.enc().node.createSVGPoint()
       p.x = x;
       p.y = y;
       return p;
@@ -308,8 +311,8 @@
     transform: function (desc) {
       var xform = [];
       for (var k in desc)
-        xform.push(k + '(' + [].concat(desc[k]).join(',') + ')');
-      return this.attrs({transform: xform.join(' ')});
+        xform.push(k + '(' + [].concat(desc[k]).join(',') + ')')
+      return this.attrs({transform: xform.join(' ')})
     },
     transformation: function (list) {
       var tx = {}, list = list || this.node.transform.baseVal;
@@ -330,7 +333,7 @@
       }
       return tx;
     }
-  });
+  })
 
   Sky = {
     util: util,
