@@ -36,12 +36,12 @@
     cut: function (x) { return util.clip(x, -359.999, 359.999) }
   }
 
-  var path = function (cmd) { return cmd + Array.prototype.slice.call(arguments, 1) }
+  var path = function (cmd) { return cmd + [].slice.call(arguments, 1) }
   up(path, {
     M: function (xy) { return path('M', xy) },
     L: function (xy) { return path('L', xy) },
     join: function () {
-      return Array.prototype.reduce.call(arguments, function (d, a) { return d + path.apply(null, a) }, '');
+      return [].reduce.call(arguments, function (d, a) { return d + path.apply(null, a) }, '');
     },
     line: function (x1, y1, x2, y2) {
       var open = open || path.M;
@@ -113,7 +113,7 @@
       return acc;
     },
     split: function (opts) {
-      return this.grid(function (acc, tile) { return acc.push(tile), acc }, [], opts);
+      return this.grid(function (acc, box) { return acc.push(box), acc }, [], opts);
     },
     center: function (cx, cy) {
       return new Box({x: cx - this.w / 2, y: cy - this.h / 2, w: this.w, h: this.h});
@@ -339,6 +339,8 @@
     rgb: function (r, g, b, a) { return new RGB({r: r, g: g, b: b, a: a}) },
     elem: function (elem, attrs, props) { return new Elem(elem, attrs, props) },
     svg: function (attrs, props) { return new SVGElem('svg', attrs, props) },
+    $: function (q, c) { return new (c || Elem)(document.querySelector(q)) },
+    $$: function (q, c) { return [].map.call(document.querySelectorAll(q), function () { return new (c || Elem) }) },
     Box: Box,
     RGB: RGB,
     Elem: Elem,
