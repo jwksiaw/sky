@@ -137,7 +137,7 @@
   }
 
   function Elem(elem, attrs, props) {
-    this.node = elem instanceof Node ? elem : document.createElementNS(this.xmlns, elem)
+    this.node = elem && elem.nodeType ? elem : document.createElementNS(this.xmlns, elem)
     this.attrs(attrs)
     this.props(props)
   }
@@ -145,9 +145,7 @@
   Elem.prototype.update({
     xmlns: "http://www.w3.org/1999/xhtml",
     addTo: function (parent) {
-      var p = parent instanceof Node ? parent : parent.node;
-      p.appendChild(this.node)
-      return this;
+      return (parent.node || parent).appendChild(this.node), this;
     },
     append: function (child) {
       return child.addTo(this) && this;
@@ -228,7 +226,7 @@
       return n;
     },
     doc: function () {
-      return this.node instanceof Document ? this : new Elem(this.node.ownerDocument)
+      return this.node.ownerDocument ? new Elem(this.node.ownerDocument) : this;
     },
     txt: function (text) {
       return this.props({textContent: text})
