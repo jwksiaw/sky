@@ -341,7 +341,7 @@
     elem: function (elem, attrs, props, doc) { return new Elem(elem, attrs, props, doc) },
     svg: function (attrs, props, doc) { return new SVGElem('svg', attrs, props, doc) },
     $: function (q, c, d) { return new (c || Elem)((d || document).querySelector(q)) },
-    $$: function (q, c, d) { return [].map.call((d || document).querySelectorAll(q), function () { return new (c || Elem) }) },
+    $$: function (q, c, d) { return [].map.call((d || document).querySelectorAll(q), function (e) { return new (c || Elem)(e) }) },
     Box: Box,
     RGB: RGB,
     Elem: Elem,
