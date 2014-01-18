@@ -136,8 +136,8 @@
     return 'rgba(' + (this.r || 0) + ',' + (this.g || 0) + ',' + (this.b || 0) + ',' + this.a + ')';
   }
 
-  function Elem(elem, attrs, props) {
-    this.node = elem && elem.nodeType ? elem : document.createElementNS(this.xmlns, elem)
+  function Elem(elem, attrs, props, doc) {
+    this.node = elem && elem.nodeType ? elem : (doc || document).createElementNS(this.xmlns, elem)
     this.attrs(attrs)
     this.props(props)
   }
@@ -338,10 +338,10 @@
     path: path,
     box: function (x, y, w, h) { return new Box({x: x, y: y, w: w, h: h}) },
     rgb: function (r, g, b, a) { return new RGB({r: r, g: g, b: b, a: a}) },
-    elem: function (elem, attrs, props) { return new Elem(elem, attrs, props) },
-    svg: function (attrs, props) { return new SVGElem('svg', attrs, props) },
-    $: function (q, c) { return new (c || Elem)(document.querySelector(q)) },
-    $$: function (q, c) { return [].map.call(document.querySelectorAll(q), function () { return new (c || Elem) }) },
+    elem: function (elem, attrs, props, doc) { return new Elem(elem, attrs, props, doc) },
+    svg: function (attrs, props, doc) { return new SVGElem('svg', attrs, props, doc) },
+    $: function (q, c, d) { return new (c || Elem)((d || document).querySelector(q)) },
+    $$: function (q, c, d) { return [].map.call((d || document).querySelectorAll(q), function () { return new (c || Elem) }) },
     Box: Box,
     RGB: RGB,
     Elem: Elem,
