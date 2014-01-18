@@ -221,6 +221,9 @@
           fun.apply(this, arguments)
       })
     },
+    each: function (sel, fun, acc) {
+      return [].reduce.call(this.node.querySelectorAll(sel), fun, acc) || this;
+    },
     root: function () {
       for (var n = this.node; n.parentNode; n = n.parentNode)
       return n;
@@ -340,8 +343,14 @@
     rgb: function (r, g, b, a) { return new RGB({r: r, g: g, b: b, a: a}) },
     elem: function (elem, attrs, props, doc) { return new Elem(elem, attrs, props, doc) },
     svg: function (attrs, props, doc) { return new SVGElem('svg', attrs, props, doc) },
-    $: function (q, c, d) { return new (c || Elem)((d || document).querySelector(q)) },
-    $$: function (q, c, d) { return [].map.call((d || document).querySelectorAll(q), function (e) { return new (c || Elem)(e) }) },
+    $: function (q) {
+      var node = typeof(q) == 'string' ? document.querySelector(q) : q;
+      switch (node.namespaceURI) {
+      case SVGElem.prototype.xmlns: return new SVGElem(node)
+      case Elem.prototype.xmlns:
+      default: return new Elem(node)
+      }
+    },
     Box: Box,
     RGB: RGB,
     Elem: Elem,
