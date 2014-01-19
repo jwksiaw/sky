@@ -123,6 +123,23 @@
     }
   })
 
+  Sun.form = {
+    encode: function (obj) {
+      var list = [];
+      for (var k in obj)
+        list.push(encodeURIComponent(k) + '=' + encodeURIComponent(obj[k]));
+      return list.join('&');
+    },
+    decode: function (str) {
+      var list = str ? str.split('&') : [];
+      return list.reduce(function (acc, item) {
+        var kv = item.split('=').map(decodeURIComponent);
+        acc[kv[0]] = kv[1];
+        return acc;
+      }, {});
+    }
+  }
+
   var H = Sun.http = Sun.up(function (method, url, fun, data, hdrs) {
     var req = new XMLHttpRequest()
     req.onreadystatechange = function () {
