@@ -92,7 +92,7 @@
     },
     on: function (keys, fun) {
       var fns = this.__fns__;
-      keys.split(/\s+/).map(function (k) { U.pre(fns, k, []).push(fun) })
+      keys.split(/\s+/).map(function (k) { (fns[k] = fns[k] || []).push(fun) })
       return this;
     },
     off: function (keys, fun) {
