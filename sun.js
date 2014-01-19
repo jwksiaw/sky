@@ -24,9 +24,9 @@
   var bezier = function (t, P) {
     var n = P.length - 1, x = 0, y = 0;
     for (i = 0; i <= n; i++) {
-      var p = P[i], w = nchoosek(n, i) * Math.pow(1 - t, n - i) * Math.pow(t, i);
-      x += w * (p[0] || 0);
-      y += w * (p[1] || 0);
+      var p = P[i], w = nchoosek(n, i) * Math.pow(1 - t, n - i) * Math.pow(t, i)
+      x += w * (p[0] || 0)
+      y += w * (p[1] || 0)
     }
     return [x, y];
   }
@@ -41,7 +41,7 @@
     nchoosek: nchoosek,
     bezier: bezier,
     clockdist: function (a, b, c) {
-      return min(mod(a - b, c || 24), mod(b - a, c || 24));
+      return min(mod(a - b, c || 24), mod(b - a, c || 24))
     },
     ellipsis: function (text, n) {
       if (n && text.length > n + 3)
@@ -50,22 +50,22 @@
     },
     fold: function (fun, acc, obj) {
       if (obj && obj.reduce)
-        return obj.reduce(fun, acc);
+        return obj.reduce(fun, acc)
       var i = 0;
       for (var k in obj)
-        acc = fun(acc, [k, obj[k]], i++, obj);
+        acc = fun(acc, [k, obj[k]], i++, obj)
       return acc;
     },
     format: function (fmt, arg) {
-      return fmt.replace(/{(.*?)}/g, function(m, k) { return k in arg ? arg[k] : m });
+      return fmt.replace(/{(.*?)}/g, function(m, k) { return k in arg ? arg[k] : m })
     },
     object: function (iter) {
-      return Sun.fold(function (o, i) { return (o[i[0]] = i[1]), o }, {}, iter);
+      return Sun.fold(function (o, i) { return (o[i[0]] = i[1]), o }, {}, iter)
     },
     repeat: function (fun, every) {
       return fun() || setTimeout(function () {
-        fun() || setTimeout(arguments.callee, every);
-      }, every);
+        fun() || setTimeout(arguments.callee, every)
+      }, every)
     },
     up: function (a, b) {
       for (var k in b)
@@ -74,53 +74,85 @@
     }
   }
 
-  Sun.form = {
-    encode: function (obj) {
-      var list = [];
-      for (var k in obj)
-        list.push(encodeURIComponent(k) + '=' + encodeURIComponent(obj[k]));
-      return list.join('&');
-    },
-    decode: function (str) {
-      var list = str ? str.split('&') : [];
-      return list.reduce(function (acc, item) {
-        var kv = item.split('=').map(decodeURIComponent);
-        acc[kv[0]] = kv[1];
-        return acc;
-      }, {});
-    }
+  Sun.Cage = function Cage(obj) {
+    this.__obj__ = obj || this;
+    this.__fns__ = {};
   }
+  Sun.up(Sun.Cage.prototype, {
+    change: function (k, v) {
+      var u = this.__obj__[k]
+      this.__obj__[k] = v;
+      this.trigger(k, v, u)
+      return v;
+    },
+    update: function (obj) {
+      for (var k in obj)
+        this.change(k, obj[k])
+      return this;
+    },
+    on: function (keys, fun) {
+      var fns = this.__fns__;
+      keys.split(/\s+/).map(function (k) { U.pre(fns, k, []).push(fun) })
+      return this;
+    },
+    off: function (keys, fun) {
+      var fns = this.__fns__;
+      keys.split(/\s+/).map(function (k) {
+        var i = fns[k].indexOf(fun)
+        if (i >= 0)
+          fns[k].splice(i, 1)
+      })
+      return this;
+    },
+    once: function (keys, fun) {
+      var n = 0;
+      return this.til(keys, fun, function () { return n++ })
+    },
+    til: function (keys, fun, dead) {
+      var cage = this;
+      cage.on(keys, function () {
+        if (dead())
+          cage.off(keys, arguments.callee)
+        else
+          fun.apply(this, arguments)
+      })
+    },
+    trigger: function (key, val, old) {
+      var self = this;
+      return (self.__fns__[key] || []).map(function (f) { f.call(self, val, old, key) })
+    }
+  })
 
   var H = Sun.http = Sun.up(function (method, url, fun, data, hdrs) {
-    var req = new XMLHttpRequest();
+    var req = new XMLHttpRequest()
     req.onreadystatechange = function () {
       if (this.readyState == this.DONE){
-        fun(this);
+        fun(this)
       }
     };
-    req.open(method, url, true);
-    Sun.fold(function (_, o) { req.setRequestHeader(o[0], o[1]) }, null, hdrs);
-    req.send(data);
+    req.open(method, url, true)
+    Sun.fold(function (_, o) { req.setRequestHeader(o[0], o[1]) }, null, hdrs)
+    req.send(data)
     return req;
   }, {
     get:  function (url, fun, hdrs)       { return H("GET",  url, fun, null, hdrs) },
     put:  function (url, fun, data, hdrs) { return H("PUT",  url, fun, data, hdrs) },
     post: function (url, fun, data, hdrs) { return H("POST", url, fun, data, hdrs) }
-  });
+  })
 
   var L = Sun.lists = {
     append: function (list, item) { return list.push(item) && list },
     groupby: function (list, key) {
       var k, key = key || function (item) { return item[0] }
       return list.reduce(function (acc, item) {
-        var k_ = key(item);
+        var k_ = key(item)
         if (k_ == k)
-          acc[acc.length - 1][1].push(item);
+          acc[acc.length - 1][1].push(item)
         else
-          acc.push([k_, [item]]);
+          acc.push([k_, [item]])
         k = k_;
         return acc;
-      }, []);
+      }, [])
     },
     insert: function (list, item, fun) {
       var lte = fun || function (a, b) { return a <= b };
@@ -138,17 +170,17 @@
       }
     },
     keydrop: function (list, val, key, eq) {
-      var i = L.keyindex(list, val, key, eq);
+      var i = L.keyindex(list, val, key, eq)
       if (i >= 0)
         return list.splice(i, 1)[0];
     },
     keyfind: function (list, val, key, eq) {
-      var i = L.keyindex(list, val, key, eq);
+      var i = L.keyindex(list, val, key, eq)
       if (i >= 0)
         return list[i];
     },
     keystore: function (list, val, rep, key, eq) {
-      var i = L.keyindex(list, val, key, eq);
+      var i = L.keyindex(list, val, key, eq)
       if (i >= 0)
         return list[i] = rep;
       return list.push(rep) && rep;
@@ -159,12 +191,12 @@
       while (i < x.length || j < y.length) {
         if (j >= y.length || lt(x[i], y[j])) {
           if (lt(l, x[i]) || !(i || j))
-            z.push(l = x[i]);
+            z.push(l = x[i])
           i++;
         }
         else {
           if (lt(l, y[j]) || !(i || j))
-            z.push(l = y[j]);
+            z.push(l = y[j])
           j++;
         }
       }
@@ -173,7 +205,7 @@
     values: function (obj) {
       var vals = [];
       for (var k in obj)
-        vals.push(obj[k]);
+        vals.push(obj[k])
       return vals;
     }
   }
@@ -189,18 +221,18 @@
                     set.h == undefined ? rel.getHours() : set.h,
                     set.mi == undefined ? rel.getMinutes() : set.mi,
                     set.s == undefined ? rel.getSeconds() : set.s,
-                    set.ms == undefined ? rel.getMilliseconds() : set.ms);
+                    set.ms == undefined ? rel.getMilliseconds() : set.ms)
   }, {
     get: function (k, rel) {
       var rel = rel ? new Date(rel) : new Date;
       switch (k) {
-        case 'y': return rel.getFullYear();
-        case 'm': return rel.getMonth();
-        case 'd': return rel.getDate();
-        case 'h': return rel.getHours();
-        case 'mi': return rel.getMinutes();
-        case 's': return rel.getSeconds();
-        case 'ms': return rel.getMilliseconds();
+        case 'y': return rel.getFullYear()
+        case 'm': return rel.getMonth()
+        case 'd': return rel.getDate()
+        case 'h': return rel.getHours()
+        case 'mi': return rel.getMinutes()
+        case 's': return rel.getSeconds()
+        case 'ms': return rel.getMilliseconds()
       }
     },
     pass: function (dif, rel) {
@@ -222,7 +254,7 @@
       var t = opt.start || new Date, stop = opt.stop, step = opt.step || {d: 1};
       var f = T.pass(step, t) >= t, jump = {};
       for (var i = 1, s = t; !stop || (f ? (t < stop) : (t > stop)); i++) {
-        acc = fun(acc, t);
+        acc = fun(acc, t)
         for (var k in step)
           jump[k] = step[k] * i;
         t = T.pass(jump, s)
@@ -233,18 +265,18 @@
       var opt = opt || {};
       var sep = opt.sep || 'T', dsep = opt.dsep || '-', tsep = opt.tsep || ':';
       var utc = opt.utc || stamp[stamp.length - 1] == 'Z';
-      var dtp = stamp.split(sep);
+      var dtp = stamp.split(sep)
       var datep = dtp[0] ? dtp[0].split(dsep).map(int) : [0, 0, 0];
       var timep = dtp[1] ? dtp[1].substring(0, 8).split(':').map(int) : [0, 0, 0];
       if (utc)
-        return new Date(Date.UTC(datep[0], datep[1] - 1, datep[2], timep[0], timep[1], timep[2]));
-      return new Date(datep[0], datep[1] - 1, datep[2], timep[0], timep[1], timep[2]);
+        return new Date(Date.UTC(datep[0], datep[1] - 1, datep[2], timep[0], timep[1], timep[2]))
+      return new Date(datep[0], datep[1] - 1, datep[2], timep[0], timep[1], timep[2])
     },
     datestamp: function (t) {
-      return t.getFullYear() + '/' + pad(t.getMonth() + 1) + '/' + pad(t.getDate());
+      return t.getFullYear() + '/' + pad(t.getMonth() + 1) + '/' + pad(t.getDate())
     },
     timestamp: function (t) {
-      return pad(t.getHours()) + ':' + pad(t.getSeconds()) + ':' + pad(t.getMinutes());
+      return pad(t.getHours()) + ':' + pad(t.getSeconds()) + ':' + pad(t.getMinutes())
     },
     stamp: function (t) { return T.datestamp(t) + ' ' + T.timestamp(t) },
     fromGregorian: function (s) { return new Date((s - 62167219200) * 1000) },
@@ -260,5 +292,5 @@
     Hour: Hour,
     Day: Day,
     Week: Week
-  });
+  })
 })();
