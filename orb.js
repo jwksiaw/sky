@@ -69,7 +69,8 @@
         if (taps++)
           fun && fun.apply(self, arguments)
         setTimeout(function () { taps = 0 }, opts.gap)
-        e.preventDefault()
+        if (opts.prevent)
+          e.preventDefault()
       })
       return this;
     },
@@ -82,22 +83,23 @@
           Orb.grab(o, e)
         press = true;
         i = setInterval(function () { Orb.move(o, opts.gain) }, opts.every)
-        e.preventDefault()
+        if (opts.prevent)
+          e.preventDefault()
       })
       this.doc().on('mouseup touchend', function (e) {
         if (press)
           Orb.free(o, e)
         press = false;
         clearInterval(i)
-        e.preventDefault()
+        if (opts.prevent)
+          e.preventDefault()
       })
       return this;
     },
     swipe: function (o, opts) {
       var opts = up({glob: true}, opts)
-      var glob = opts.glob, stop = opts.stop;
       var swipe, lx, ly;
-      var doc = this.doc(), that = glob ? doc : this;
+      var doc = this.doc(), that = opts.glob ? doc : this;
       this.on('mousedown touchstart', function (e) {
         var t = e.touches ? e.touches[0] : e;
         if (!swipe)
@@ -105,7 +107,8 @@
         swipe = true;
         lx = t.pageX;
         ly = t.pageY;
-        e.preventDefault()
+        if (opts.prevent)
+          e.preventDefault()
       })
       that.on('mousemove touchmove', function (e) {
         if (swipe) {
@@ -113,27 +116,29 @@
           Orb.move(o, t.pageX - lx, t.pageY - ly, lx, ly, t.pageX, t.pageY)
           lx = t.pageX;
           ly = t.pageY;
-          if (stop)
+          if (opts.stop)
             e.stopImmediatePropagation()
-          e.preventDefault()
+          if (opts.prevent)
+            e.preventDefault()
         }
       })
       doc.on('mouseup touchend', function (e) {
         if (swipe)
           Orb.free(o, e)
         swipe = false;
-        e.preventDefault()
+        if (opts.prevent)
+          e.preventDefault()
       })
       return this;
     },
     scroll: function (o, opts) {
-      var opts = up({}, opts)
-      var stop = opts.stop;
+      var opts = up({prevent: true}, opts)
       return this.on('mousewheel', function (e) {
         Orb.move(o, e.wheelDeltaX, e.wheelDeltaY)
-        if (stop)
+        if (opts.stop)
           e.stopImmediatePropagation()
-        e.preventDefault()
+        if (opts.prevent)
+          e.preventDefault()
       }).swipe(o, opts)
     },
 
