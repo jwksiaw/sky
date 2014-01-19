@@ -15,8 +15,8 @@
   Orb.prototype.update({
     prop: function (f, a) { return Orb.do(this.jack, f, a) },
     push: function () { return this.prop('move', arguments) },
-    grab: function () { this.grip++; return this.prop('grab') },
-    free: function () { this.grip--; return this.prop('free') },
+    grab: function () { this.grip++; return this.prop('grab', arguments) },
+    free: function () { this.grip--; return this.prop('free', arguments) },
     move: function () { return this.prop('move', arguments) },
   })
   Orb = up(Orb, {
@@ -28,8 +28,8 @@
           return o.reduce(function (_, i) { return Orb.do(i, f, a) }, 0)
       }
     },
-    grab: function (o) { return Orb.do(o, 'grab') },
-    free: function (o) { return Orb.do(o, 'free') },
+    grab: function (o, a, r, g, s) { return Orb.do(o, 'grab', a, r, g, s) },
+    free: function (o, a, r, g, s) { return Orb.do(o, 'free', a, r, g, s) },
     move: function (o, dx, dy, a, r, g, s) {
       return Orb.do(o, 'move', [dx || 0, dy || 0, a, r, g, s])
     },
@@ -79,14 +79,14 @@
       var press, i;
       this.on('mousedown touchstart', function (e) {
         if (!press)
-          Orb.grab(o)
+          Orb.grab(o, e)
         press = true;
         i = setInterval(function () { Orb.move(o, opts.gain) }, opts.every)
         e.preventDefault()
       })
       this.doc().on('mouseup touchend', function (e) {
         if (press)
-          Orb.free(o)
+          Orb.free(o, e)
         press = false;
         clearInterval(i)
         e.preventDefault()
@@ -101,7 +101,7 @@
       this.on('mousedown touchstart', function (e) {
         var t = e.touches ? e.touches[0] : e;
         if (!swipe)
-          Orb.grab(o)
+          Orb.grab(o, e)
         swipe = true;
         lx = t.pageX;
         ly = t.pageY;
@@ -120,7 +120,7 @@
       })
       doc.on('mouseup touchend', function (e) {
         if (swipe)
-          Orb.free(o)
+          Orb.free(o, e)
         swipe = false;
         e.preventDefault()
       })
