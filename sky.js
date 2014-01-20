@@ -309,6 +309,12 @@
     polar: function (r, a) {
       return [r * trig.cos(a), r * trig.sin(a)];
     },
+    shift: function (dx, dy) {
+      var x = this.transformation(), t = x.translate = x.translate || [0, 0]
+      t[0] += dx || 0;
+      t[1] += dy || 0;
+      return this.transform(x)
+    },
     transform: function (desc) {
       var xform = [];
       for (var k in desc)
