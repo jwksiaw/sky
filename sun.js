@@ -1,4 +1,9 @@
 (function () {
+  var up = function (a, b) {
+    for (var k in b)
+      a[k] = b[k];
+    return a;
+  }
   var int = function (x) { return parseInt(x, 10) }
   var sgn = function (x) { return x < 0 ? -1 : 1 }
   var max = function (x, y) { return x > y ? x : y }
@@ -32,6 +37,7 @@
   }
 
   Sun = {
+    up: up,
     int: int,
     sgn: sgn,
     max: max,
@@ -66,19 +72,15 @@
       return fun() || setTimeout(function () {
         fun() || setTimeout(arguments.callee, every)
       }, every)
-    },
-    up: function (a, b) {
-      for (var k in b)
-        a[k] = b[k];
-      return a;
     }
   }
 
-  Sun.Cage = function Cage(obj) {
+  Sun.Cage = function Cage(obj, opt) {
+    this.__opt__ = up({sep: /\s+/}, opt)
     this.__obj__ = obj || this;
     this.__fns__ = {};
   }
-  Sun.up(Sun.Cage.prototype, {
+  up(Sun.Cage.prototype, {
     change: function (k, v) {
       var u = this.__obj__[k]
       this.__obj__[k] = v;
@@ -91,13 +93,13 @@
       return this;
     },
     on: function (keys, fun) {
-      var fns = this.__fns__;
-      keys.split(/\s+/).map(function (k) { (fns[k] = fns[k] || []).push(fun) })
+      var fns = this.__fns__, sep = this.__opt__.sep;
+      keys.split(sep).map(function (k) { (fns[k] = fns[k] || []).push(fun) })
       return this;
     },
     off: function (keys, fun) {
-      var fns = this.__fns__;
-      keys.split(/\s+/).map(function (k) {
+      var fns = this.__fns__, sep = this.__opt__.sep;
+      keys.split(sep).map(function (k) {
         var i = fns[k].indexOf(fun)
         if (i >= 0)
           fns[k].splice(i, 1)
@@ -140,7 +142,7 @@
     }
   }
 
-  var H = Sun.http = Sun.up(function (method, url, fun, data, hdrs) {
+  var H = Sun.http = up(function (method, url, fun, data, hdrs) {
     var req = new XMLHttpRequest()
     req.onreadystatechange = function () {
       if (this.readyState == this.DONE){
@@ -230,7 +232,7 @@
   var Sec = 1000, Min = 60 * Sec, Hour = 60 * Min, Day = 24 * Hour, Week = 7 * Day;
   var DoW = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
   var MoY = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-  var T = Sun.time = Sun.up(function (set, rel) {
+  var T = Sun.time = up(function (set, rel) {
     var rel = rel ? new Date(rel) : new Date, set = set || {};
     return new Date(set.y == undefined ? rel.getFullYear() : set.y,
                     set.m == undefined ? rel.getMonth() : set.m,
