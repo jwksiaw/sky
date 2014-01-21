@@ -225,7 +225,7 @@
       return [].reduce.call(this.node.querySelectorAll(sel), fun, acc) || this;
     },
     root: function () {
-      for (var n = this.node; n.parentNode; n = n.parentNode)
+      for (var n = this.node; n.parentNode; n = n.parentNode) {}
       return n;
     },
     doc: function () {
