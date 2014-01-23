@@ -233,6 +233,14 @@
     },
     txt: function (text) {
       return this.props({textContent: text})
+    },
+    $: function (q) {
+      var node = typeof(q) == 'string' ? this.node.querySelector(q) : q;
+      switch (node.namespaceURI) {
+      case SVGElem.prototype.xmlns: return new SVGElem(node)
+      case Elem.prototype.xmlns:
+      default: return new Elem(node)
+      }
     }
   })
 
@@ -349,14 +357,7 @@
     rgb: function (r, g, b, a) { return new RGB({r: r, g: g, b: b, a: a}) },
     elem: function (elem, attrs, props, doc) { return new Elem(elem, attrs, props, doc) },
     svg: function (attrs, props, doc) { return new SVGElem('svg', attrs, props, doc) },
-    $: function (q) {
-      var node = typeof(q) == 'string' ? document.querySelector(q) : q;
-      switch (node.namespaceURI) {
-      case SVGElem.prototype.xmlns: return new SVGElem(node)
-      case Elem.prototype.xmlns:
-      default: return new Elem(node)
-      }
-    },
+    $: function (q) { return new Elem(document).$(q) },
     Box: Box,
     RGB: RGB,
     Elem: Elem,
