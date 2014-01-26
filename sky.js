@@ -236,11 +236,12 @@
     },
     $: function (q) {
       var node = typeof(q) == 'string' ? this.node.querySelector(q) : q;
-      switch (node.namespaceURI) {
-      case SVGElem.prototype.xmlns: return new SVGElem(node)
-      case Elem.prototype.xmlns:
-      default: return new Elem(node)
-      }
+      if (node)
+        switch (node.namespaceURI) {
+        case SVGElem.prototype.xmlns: return new SVGElem(node)
+        case Elem.prototype.xmlns:
+        default: return new Elem(node)
+        }
     }
   })
 
