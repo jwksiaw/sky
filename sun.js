@@ -100,7 +100,7 @@
     off: function (keys, fun) {
       var fns = this.__fns__, sep = this.__opt__.sep;
       keys.split(sep).map(function (k) {
-        var i = fns[k].indexOf(fun)
+        var i = (fns[k] || []).indexOf(fun)
         if (i >= 0)
           fns[k].splice(i, 1)
       })
