@@ -160,6 +160,7 @@
   })
 
   var L = Sun.lists = {
+    last: function (list, n) { return list[list.length - (n || 1)] },
     append: function (list, item) { return list.push(item) && list },
     groupby: function (list, key) {
       var k, key = key || function (item) { return item[0] }
