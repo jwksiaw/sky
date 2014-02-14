@@ -5,6 +5,11 @@
   var sgn = function (x) { return x < 0 ? -1 : 1 }
   var cat = function (a, b) { return b ? [].concat(a, b) : a }
 
+  var touch = 'ontouchstart' in window;
+  var pointerdown = touch ? 'touchstart' : 'mousedown';
+  var pointermove = touch ? 'touchmove' : 'mousemove';
+  var pointerup = touch ? 'touchend' : 'mouseup';
+
   Orb = function Orb(obj, jack, elem) {
     this.jack = jack || this.jack;
     this.elem = elem || this.elem;
@@ -34,9 +39,9 @@
       return Orb.do(o, 'move', [dx || 0, dy || 0, a, r, g, s])
     },
     init: function (o) { Orb.call(o); return o },
-    type: function (cons, proto) {
-      cons.prototype = new Orb().update(proto)
-      cons.prototype.constructor = cons;
+    type: function (cons) {
+      var proto = cons.prototype = new Orb;
+      [].slice.call(arguments, 1).map(function (base) { up(proto, base) })
       return function (a, r, g, s) { return Orb.init(new cons(this, a, r, g, s)) }
     }
   })
@@ -59,13 +64,14 @@
         free: function () {
           if (open)
             fun && fun.apply(self, arguments)
+          open = false;
         }
       }))
     },
     dbltap: function (fun, opts) {
       var opts = up({gap: 250}, opts)
       var self= this, taps = 0;
-      this.on('mouseup touchend', function (e) {
+      this.on(pointerdown, function (e) {
         if (taps++)
           fun && fun.apply(self, arguments)
         setTimeout(function () { taps = 0 }, opts.gap)
@@ -78,7 +84,7 @@
     press: function (o, opts) {
       var opts = up({gain: 1, every: 1}, opts)
       var press, i;
-      this.on('mousedown touchstart', function (e) {
+      this.on(pointerdown, function (e) {
         if (!press)
           Orb.grab(o, e)
         press = true;
@@ -86,7 +92,7 @@
         if (opts.prevent)
           e.preventDefault()
       })
-      this.doc().on('mouseup touchend', function (e) {
+      this.doc().on(pointerup, function (e) {
         if (press)
           Orb.free(o, e)
         press = false;
@@ -98,19 +104,18 @@
     },
     swipe: function (o, opts) {
       var opts = up({glob: true}, opts)
-      var swipe, lx, ly;
+      var swipe = 0, lx, ly;
       var doc = this.doc(), that = opts.glob ? doc : this;
-      this.on('mousedown touchstart', function (e) {
+      this.on(pointerdown, function (e) {
         var t = e.touches ? e.touches[0] : e;
-        if (!swipe)
+        if (!swipe++)
           Orb.grab(o, e)
-        swipe = true;
         lx = t.pageX;
         ly = t.pageY;
         if (opts.prevent)
           e.preventDefault()
       })
-      that.on('mousemove touchmove', function (e) {
+      that.on(pointermove, function (e) {
         if (swipe) {
           var t = e.touches ? e.touches[0] : e;
           Orb.move(o, t.pageX - lx, t.pageY - ly, lx, ly, t.pageX, t.pageY)
@@ -122,10 +127,9 @@
             e.preventDefault()
         }
       })
-      doc.on('mouseup touchend', function (e) {
-        if (swipe)
+      doc.on(pointerup, function (e) {
+        if (swipe && !--swipe)
           Orb.free(o, e)
-        swipe = false;
         if (opts.prevent)
           e.preventDefault()
       })

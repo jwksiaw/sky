@@ -113,6 +113,10 @@
       var w = a * this.w, h = def(b, a) * this.h;
       return new Box({x: this.midX - w / 2, y: this.midY - h / 2, w: w, h: h})
     },
+    trim: function (t, r, b, l) {
+      var t = t || 0, r = r || 0, b = b || 0, l = l || 0;
+      return new Box({x: this.x + l, y: this.y + t, w: this.w - r - l, h: this.h - t - b})
+    },
     rect: function (elem) { with (this) return elem.rect(x, y, w, h) },
     toString: function () { with (this) return x + ',' + y + ',' + w + ',' + h }
   };
