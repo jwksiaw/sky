@@ -101,6 +101,7 @@
             } else {
               if (percent > 0)
                 return this.move(-percent)
+              elem.remove()
             }
           }
         })
