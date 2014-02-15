@@ -1,5 +1,5 @@
 (function () {
-  var P = Sky.path, up = Sun.up, Cage = Sun.Cage;
+  var P = Sky.path, U = Sky.util, up = Sun.up, Cage = Sun.Cage;
 
   up(Sky.SVGElem.prototype, {
     chevron: function (cx, cy, w, h) {
@@ -89,7 +89,7 @@
           frame.change('top', this)
         this.state = up(state, {win: this})
         this.jack = elem.spring(elem.orb({
-          move: function (dx) { xfer.call(this, percent += dx) }
+          move: function (dx) { xfer.call(this, percent = U.clip(percent + dx, 0, 100)) }
         }, this.plugs = []), {
           kx: 2,
           balance: function () {
