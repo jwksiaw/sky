@@ -58,7 +58,7 @@
         move: function (dx, dy) {
           Dx += dx;
           Dy += dy;
-          if (abs(dx) > opts.mx || abs(dy) > opts.my)
+          if (abs(Dx) > opts.mx || abs(Dy) > opts.my)
             open = false;
         },
         free: function () {

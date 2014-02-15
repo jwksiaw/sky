@@ -28,34 +28,40 @@
   }
 
   var path = function (cmd) { return cmd + [].slice.call(arguments, 1) }
-  up(path, {
-    M: function (xy) { return path('M', xy) },
-    L: function (xy) { return path('L', xy) },
+  var P = up(path, {
+    M: function (xy) { return P('M', xy) },
+    L: function (xy) { return P('L', xy) },
     join: function () {
-      return [].reduce.call(arguments, function (d, a) { return d + path.apply(null, a) }, '')
+      return [].reduce.call(arguments, function (d, a) { return d + P.apply(null, a) }, '')
     },
     line: function (x1, y1, x2, y2) {
-      var open = open || path.M;
-      return open([x1, y1]) + path.L([x2, y2])
+      var open = open || P.M;
+      return open([x1, y1]) + P.L([x2, y2])
     },
     rect: function (x, y, w, h, open) {
-      var open = open || path.M;
+      var open = open || P.M;
       var h = def(h, w)
-      return open([x, y]) + path('H', x + w) + path('V', y + h) + path('H', x) + 'Z';
+      return open([x, y]) + P('H', x + w) + P('V', y + h) + P('H', x) + 'Z';
+    },
+    chevron: function (cx, cy, w, h, open) {
+      var open = open || P.M;
+      var h = def(h, 2 * w), g = h / 2;
+      var x = cx - w / 2, y = cy - g;
+      return open([x, y]) + P('l', w, g) + P('l', -w, g)
     },
     triangle: function (cx, cy, b, h, open) {
-      var open = open || path.M;
+      var open = open || P.M;
       var h = def(h, b)
       var x = cx - b / 2, y = cy - h / 2;
-      return open([x, y]) + path('L', cx, y + h) + path('L', x + b, y) + 'Z';
+      return open([x, y]) + P('L', cx, y + h) + P('L', x + b, y) + 'Z';
     },
     arc: function (cx, cy, rx, ry, len, off, open) {
-      var open = open || path.M;
+      var open = open || P.M;
       var len = trig.cut(def(len, 360)), off = off || 0;
       var ix = cx + rx * trig.cos(off), iy = cy + ry * trig.sin(off)
       var fx = cx + rx * trig.cos(off + len), fy = cy + ry * trig.sin(off + len)
       return (open([ix, iy]) +
-              path('A',
+              P('A',
                    rx, ry, 0,
                    Math.abs(len) > 180 ? 1 : 0,
                    len > 0 ? 1 : 0,
@@ -63,18 +69,18 @@
     },
     oval: function (cx, cy, rx, ry, open) {
       var ry = def(ry, rx)
-      return path.arc(cx, cy, rx, ry, 360, 0, open)
+      return P.arc(cx, cy, rx, ry, 360, 0, open)
     },
     arch: function (cx, cy, rx, ry, t, len, off, open) {
       var len = trig.cut(def(len, 360)), off = off || 0;
       var t = def(t, 1)
-      return (path.arc(cx, cy, rx, ry, len, off, open) +
-              path.arc(cx, cy, rx + t, ry + t, -len, off + len, path.L) + 'Z')
+      return (P.arc(cx, cy, rx, ry, len, off, open) +
+              P.arc(cx, cy, rx + t, ry + t, -len, off + len, P.L) + 'Z')
     },
     ring: function (cx, cy, rx, ry, t, open) {
       var t = def(t, 1)
-      return (path.arc(cx, cy, rx, ry, 360, 0, open) +
-              path.arc(cx, cy, rx + t, ry + t, -360, 360))
+      return (P.arc(cx, cy, rx, ry, 360, 0, open) +
+              P.arc(cx, cy, rx + t, ry + t, -360, 360))
     }
   })
 
@@ -163,9 +169,17 @@
         node.removeChild(node.firstChild)
       return this;
     },
+    attr: function (name, ns) {
+      return this.node.getAttributeNS(ns || null, name)
+    },
     attrs: function (attrs, ns) {
-      for (var k in attrs)
-        this.node.setAttributeNS(ns || null, k, attrs[k])
+      for (var k in attrs) {
+        var v = attrs[k]
+        if (v == null)
+          this.node.removeAttributeNS(ns || null, k)
+        else
+          this.node.setAttributeNS(ns || null, k, v)
+      }
       return this;
     },
     props: function (props) {
@@ -188,6 +202,11 @@
     },
     remove: function () {
       this.node.parentNode.removeChild(this.node)
+      return this;
+    },
+    insert: function (k) {
+      var n = this.node, p = n.parentNode;
+      p.insertBefore(n, p.childNodes[k])
       return this;
     },
     on: function (types, fun, capture) {
