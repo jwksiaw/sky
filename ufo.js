@@ -109,8 +109,10 @@
         switch (opts.transition) {
         case 'next':
           xfer = function (p) {
-            if (frame.top)
+            if (frame.top) {
               frame.top.chrome.style({opacity: (1 - p / 100)})
+              Orb.move(frame.top.plugs, -p / 100 )
+            }
             chrome.style({opacity: p / 100})
             content.transform({translate: (1 - p / 100) * dims.w})
             this.push(1 - p / 100)
@@ -123,6 +125,7 @@
             if (frame.top) {
               frame.top.chrome.style({opacity: 1 - p / 100})
               frame.top.content.transform({translate: p / 100 * dims.w})
+              Orb.move(frame.top.plugs, p / 100)
             }
             chrome.style({opacity: p / 100})
             this.push(p / 100 - 1)
