@@ -68,16 +68,28 @@
     }
   })
 
+  var proto = {
+    theme: function (base) {
+      return this.walk(function (acc) { return up(acc, this.opts.theme) }, base || {})
+    }
+  }
+
+  var otype = function (cons) {
+    var args = [].slice.call(arguments, 1)
+    return Orb.type.apply(Orb, [].concat.call([cons, proto], args))
+  }
+
   var iOS7x = {
-    frame: Orb.type(function Frame(pkg, root, opts) {
+    frame: otype(function Frame(pkg, root, opts) {
       Cage.call(this)
-      var opts = up({}, opts)
+      var opts = this.opts = up({}, opts)
       var dims = this.dims = Sky.box(0, 0, 200, 200 / opts.aspectRatio)
       var elem = this.elem = new Sky.svg({viewBox: dims}).addTo(root)
       this.on('top', function (n, o) { o && o != n && o.elem.remove() })
     }, new Cage, {
-      window: Orb.type(function Window(frame, state, opts) {
-        var opts = up({}, opts)
+      window: otype(function Window(frame, state, opts) {
+        var parent = this.parent = frame;
+        var opts = this.opts = up({}, opts)
         var dims = this.dims = frame.dims;
         var elem = this.elem = frame.elem.g()
         var chrome = this.chrome = elem.g()
@@ -111,7 +123,7 @@
           xfer = function (p) {
             if (frame.top) {
               frame.top.chrome.style({opacity: (1 - p / 100)})
-              Orb.move(frame.top.plugs, -p / 100 )
+              Orb.move(frame.top.plugs, -p / 100)
             }
             chrome.style({opacity: p / 100})
             content.transform({translate: (1 - p / 100) * dims.w})
@@ -149,27 +161,29 @@
         }
         xfer.call(this, percent = 0)
       }, {
-        navbar: Orb.type(function NavBar(win, opts) {
+        navbar: otype(function NavBar(win, opts) {
           var x, y, w, h, f, d = win.dims;
-          var opts = up({}, opts)
+          var parent = this.parent = win;
+          var opts = this.opts = up({}, opts)
           var dims = this.dims = Sky.box(x = d.x, y = d.y, w = d.w, h = .07 * d.h)
           var elem = this.elem = win.chrome.g({'font-size': f = 10})
 
           var m = dims.midY + f / 3;
           var state = win.state, nav = state.nav, page = nav.pages[state.tag], prev = state.prev;
           var title = opts.title || page.title, right = opts.right;
+          var theme = this.theme({link: 'blue', tint: '#fdfdfd'})
 
-          var bgrd = this.bgrd = elem.rect(x, y, w, h).attrs({fill: '#fdfdfd'})
+          var bgrd = this.bgrd = elem.rect(x, y, w, h).attrs({fill: theme.tint})
           var tbar = this.tbar = elem.text(dims.midX, m, title).attrs({'text-anchor': 'middle', 'font-weight': 700})
 
           if (prev) {
             var back = this.back = elem.button(function () { nav.action('back')(state.data) })
-            back.chevron(x + 6, dims.midY, -5).attrs({stroke: 'blue'})
-            back.text(x + 12, m, nav.pages[prev.tag].title).attrs({'text-anchor': 'start', fill: 'blue'})
+            back.chevron(x + 6, dims.midY, -5).attrs({stroke: theme.link})
+            back.text(x + 12, m, nav.pages[prev.tag].title).attrs({'text-anchor': 'start', fill: theme.link})
           }
           if (right) {
             var rbtn = this.rbtn = elem.button(function () { right.action() })
-            rbtn.text(dims.right - 6, m, right.label).attrs({'text-anchor': 'end', fill: 'blue'})
+            rbtn.text(dims.right - 6, m, right.label).attrs({'text-anchor': 'end', fill: theme.link})
           }
 
           win.plugs.push({

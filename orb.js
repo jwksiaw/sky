@@ -23,6 +23,7 @@
     grab: function () { this.grip++; return this.prop('grab', arguments) },
     free: function () { this.grip--; return this.prop('free', arguments) },
     move: function () { return this.prop('move', arguments) },
+    walk: function (f, a) { return Orb.walk(this, f, a) }
   })
   Orb = up(Orb, {
     do: function (o, f, a) {
@@ -43,6 +44,9 @@
       var proto = cons.prototype = new Orb;
       [].slice.call(arguments, 1).map(function (base) { up(proto, base) })
       return function (a, r, g, s) { return Orb.init(new cons(this, a, r, g, s)) }
+    },
+    walk: function (o, f, a) {
+      return f.call(o, o.parent ? Orb.walk(o.parent, f, a) : a)
     }
   })
 
