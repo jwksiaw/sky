@@ -4,6 +4,10 @@
       a[k] = b[k];
     return a;
   }
+  var cls = function (cons) {
+    [].slice.call(arguments, 1).map(function (base) { up(cons.prototype, base) })
+    return cons;
+  }
   var int = function (x) { return parseInt(x, 10) }
   var sgn = function (x) { return x < 0 ? -1 : 1 }
   var max = function (x, y) { return x > y ? x : y }
@@ -38,6 +42,7 @@
 
   Sun = {
     up: up,
+    cls: cls,
     int: int,
     sgn: sgn,
     max: max,

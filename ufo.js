@@ -15,12 +15,7 @@
     },
   })
 
-  var type = function (cons) {
-    [].slice.call(arguments, 1).map(function (base) { up(cons.prototype, base) })
-    return cons;
-  }
-
-  var Nav = type(function Nav(init, state, frame) {
+  var Nav = Sun.cls(function Nav(init, state, frame) {
     Cage.call(this)
     this.pages = init(this)
     this.state = state;
