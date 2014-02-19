@@ -5,7 +5,7 @@
   var pre = function (a, k, d) { return a[k] = get(a, k, d) }
   var up = function (a, b) {
     for (var k in b)
-      a[k] = b[k];
+      a[k] = b[k]
     return a;
   }
   var anim = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame;

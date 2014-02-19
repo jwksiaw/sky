@@ -154,7 +154,7 @@
       return new Orb(obj, jack, this)
     },
 
-    crank: Orb.type(function Spring(elem, jack, opts) {
+    crank: Orb.type(function Crank(elem, jack, opts) {
       var opts = up({}, opts)
       var cx = opts.cx || 0, cy = opts.cy || 0;
       var c = elem.point(cx, cy).matrixTransform(elem.node.getScreenCTM())
@@ -216,7 +216,7 @@
       var vbox = opts.vbox || elem.node.getBBox()
       var xmin, xmax, ymin, ymax;
       var setBBox = this.setBBox = function (bbox) {
-        var b = bbox || {};
+        var b = bbox || {}
         xmin = def(b.x, -Infinity); xmax = def(b.x + b.width - vbox.width, Infinity)
         ymin = def(b.y, -Infinity); ymax = def(b.y + b.height - vbox.height, Infinity)
       }
@@ -228,7 +228,7 @@
         var cur = elem.node.viewBox.baseVal;
         var dim = [clip(cur.x - dx, xmin, xmax),
                    clip(cur.y - dy, ymin, ymax),
-                   cur.width, cur.height];
+                   cur.width, cur.height]
         elem.attrs({viewBox: this.push(dx, dy, dim) || dim})
       }
     }),
@@ -236,7 +236,7 @@
       var opts = up({}, opts)
       var xmin, xmax, ymin, ymax;
       var setBBox = this.setBBox = function (bbox) {
-        var b = bbox || {};
+        var b = bbox || {}
         xmin = def(b.x, -Infinity); xmax = def(b.x + b.width, Infinity)
         ymin = def(b.y, -Infinity); ymax = def(b.y + b.height, Infinity)
       }
@@ -245,16 +245,16 @@
       this.elem = elem;
       this.jack = jack;
       this.move = function (dx, dy) {
-        var cur = elem.transformation(), off = cur.translate || [0, 0];
+        var cur = elem.transformation(), off = cur.translate || [0, 0]
         cur.translate = [clip(off[0] + dx, xmin, xmax),
-                         clip(off[1] + dy, ymin, ymax)];
+                         clip(off[1] + dy, ymin, ymax)]
         elem.transform(this.push(dx, dy, cur) || cur)
       }
     }),
 
     loop: Orb.type(function Loop(elem, jack, opts) {
       var opts = up({}, opts)
-      var bbox = opts.bbox || {}, wrap = opts.wrap || function () {};
+      var bbox = opts.bbox || {}, wrap = opts.wrap || function () {}
       var xmin = def(bbox.x, -Infinity), xmax = def(bbox.x + bbox.width, Infinity)
       var ymin = def(bbox.y, -Infinity), ymax = def(bbox.y + bbox.height, Infinity)
       var wide = xmax - xmin, high = ymax - ymin;
@@ -262,7 +262,7 @@
       this.elem = elem;
       this.jack = jack;
       this.move = function (dx, dy, cur) {
-        var off = cur.translate || [0, 0];
+        var off = cur.translate || [0, 0]
         var ox = off[0], oy = off[1], over = true;
         while (over) {
           over = false;
@@ -279,7 +279,7 @@
               over = wrap.call(this, 0, -1, ox, oy -= high) || true;
           }
         }
-        cur.translate = [ox, oy];
+        cur.translate = [ox, oy]
         return this.push(dx, dy, cur) || cur;
       }
     })
@@ -296,7 +296,7 @@
       var elem = this.elem = elem;
       var jack = this.jack = elem.spring(cat(orb, jack), up(opts, {
         balance: function () {
-          var t = elem.transformation(), z = t.translate || [0, 0];
+          var t = elem.transformation(), z = t.translate || [0, 0]
           var ox = w && z[0] % w, oy = h && z[1] % h;
           if (abs(ox) > 1e-3 || abs(oy) > 1e-3)
             this.move(abs(ox) < w / 2 && !truncate ? -ox : sgn(ox) * w - ox,
@@ -308,14 +308,14 @@
       }))
 
       this.goto = function (i, j) {
-        var t = elem.transformation(), z = t.translate || [0, 0];
+        var t = elem.transformation(), z = t.translate || [0, 0]
         var ox = z[0] + jack.dx - (i || 0) * w, oy = z[1] + jack.dy - (j || 0) * h;
         this.move(-ox, -oy)
       }
 
       this.slot = function () {
-        var t = elem.transformation(), z = t.translate || [0, 0];
-        return [~~((z[0] + jack.dx) / w), ~~((z[1] + jack.dy) / h)];
+        var t = elem.transformation(), z = t.translate || [0, 0]
+        return [~~((z[0] + jack.dx) / w), ~~((z[1] + jack.dy) / h)]
       }
     })
   })
