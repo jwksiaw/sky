@@ -10,8 +10,9 @@
       return this.g({cursor: 'pointer'}).tap(fun)
     },
 
-    label: function (cx, cy, text) {
-      return this.text(cx, cy, text).attrs({'text-anchor': 'middle', 'dominant-baseline': 'central'})
+    label: function (cx, cy, text, da) {
+      var anchor = da > 0 ? 'start' : (da < 0 ? 'end' : 'middle')
+      return this.text(cx, cy, text).attrs({'text-anchor': anchor, 'dominant-baseline': 'central'})
     },
 
     icon: function (x, y, w, h, name) {
@@ -178,11 +179,11 @@
           if (prev) {
             var back = this.back = elem.button(function () { nav.action('back')(state.data) })
             back.chevron(x + 6, m, -5).attrs({stroke: theme.link})
-            back.label(x + 12, m, nav.pages[prev.tag].title).attrs({'text-anchor': 'start', fill: theme.link})
+            back.label(x + 12, m, nav.pages[prev.tag].title, 1).attrs({fill: theme.link})
           }
           if (right) {
             var rbtn = this.rbtn = elem.button(function () { right.action() })
-            rbtn.label(dims.right - 6, m, right.label).attrs({'text-anchor': 'end', fill: theme.link})
+            rbtn.label(dims.right - 6, m, right.label, -1).attrs({fill: theme.link})
           }
 
           win.plugs.push({
