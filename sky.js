@@ -347,7 +347,7 @@
       with (box || this.bbox())
         return this.ellipse(midX, midY, def(px, 1) * w / 2, def(py, 1) * h / 2)
     },
-    iconX: function (box) {
+    iconX: function (box, name) {
       with (box || this.bbox())
         return this.icon(x, y, w, h, name)
     },
