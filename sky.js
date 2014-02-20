@@ -112,6 +112,12 @@
     split: function (opts) {
       return this.grid(function (acc, box) { return acc.push(box), acc }, [], opts)
     },
+    align: function (box, ax, ay) {
+      var nx = (ax || 0) / 2, ny = (ay || 0) / 2, ox = nx + .5, oy = ny + .5;
+      var x = box.midX + nx * box.w - ox * this.w;
+      var y = box.midY + ny * box.h - oy * this.h;
+      return new Box({x: x, y: y, w: this.w, h: this.h})
+    },
     center: function (cx, cy) {
       return new Box({x: cx - this.w / 2, y: cy - this.h / 2, w: this.w, h: this.h})
     },
