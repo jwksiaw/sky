@@ -1,31 +1,13 @@
 (function () {
-  var P = Sky.path, U = Sky.util, def = U.def, up = Sun.up, Cage = Sun.Cage;
+  var P = Sky.path, U = Sky.util, up = Sun.up, Cage = Sun.Cage;
 
   up(Sky.SVGElem.prototype, {
-    border: function (t, r, b, l, box) {
-      var t = def(t, 0), r = def(r, t), b = def(b, t), l = def(l, r)
-      with (box || this.bbox()) {
-        var ix = x + l, iy = y + t, iw = w - l - r, ih = h - t - b;
-        return this.path(P.line(x, y, x + w, y) + P('v', h) + P('h', -w) + P('v', -h) +
-                         P.line(ix, iy, ix, iy + ih) + P('h', iw) + P('v', -ih) + P('h', -iw))
-      }
-    },
-
     button: function (fun) {
       return this.g({cursor: 'pointer'}).tap(fun)
     },
 
     chevron: function (cx, cy, w, h) {
       return this.path(P.chevron(cx, cy, w, h)).attrs({fill: 'none', 'stroke-width': 1.5})
-    },
-
-    icon: function (x, y, w, h, name) {
-      return this.use(name).xywh(x, y, w, h)
-    },
-
-    label: function (cx, cy, text, da) {
-      var anchor = da > 0 ? 'start' : (da < 0 ? 'end' : 'middle')
-      return this.text(cx, cy, text).attrs({'text-anchor': anchor, 'dominant-baseline': 'central'})
     }
   })
 
@@ -189,11 +171,11 @@
           if (prev) {
             var back = this.back = elem.button(function () { nav.action('back')(state.data) })
             back.chevron(x + 6, m, -5).attrs({stroke: theme.link})
-            back.label(x + 12, m, nav.pages[prev.tag].title, 1).attrs({fill: theme.link})
+            back.label(x + 12, m, nav.pages[prev.tag].title, -1).attrs({fill: theme.link})
           }
           if (right) {
             var rbtn = this.rbtn = elem.button(function () { right.action() })
-            rbtn.label(dims.right - 6, m, right.label, -1).attrs({fill: theme.link})
+            rbtn.label(dims.right - 6, m, right.label, 1).attrs({fill: theme.link})
           }
 
           win.plugs.push({

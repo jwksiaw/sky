@@ -119,11 +119,17 @@
       var w = a * this.w, h = def(b, a) * this.h;
       return new Box({x: this.midX - w / 2, y: this.midY - h / 2, w: w, h: h})
     },
+    shift: function (dx, dy) {
+      return new Box({x: this.x + (dx || 0), y: this.y + (dy || 0), w: this.w, h: this.h})
+    },
+    square: function (big) {
+      var o = big ? Math.max : Math.min, d = o(this.w, this.h)
+      return new Box({x: this.x, y: this.y, w: d, h: d})
+    },
     trim: function (t, r, b, l) {
       var t = t || 0, r = r || 0, b = b || 0, l = l || 0;
       return new Box({x: this.x + l, y: this.y + t, w: this.w - r - l, h: this.h - t - b})
     },
-    rect: function (elem) { with (this) return elem.rect(x, y, w, h) },
     toString: function () { with (this) return x + ',' + y + ',' + w + ',' + h }
   }
 
@@ -317,6 +323,48 @@
     svg: function (attrs, props) {
       return this.child('svg', attrs, props)
     },
+    icon: function (x, y, w, h, name) {
+      return this.use(name).xywh(x, y, w, h)
+    },
+    label: function (x, y, text, i, j) {
+      return this.text(x, y, text).anchor(i, j)
+    },
+
+    border: function (t, r, b, l, box) {
+      var t = def(t, 0), r = def(r, t), b = def(b, t), l = def(l, r)
+      with (box || this.bbox()) {
+        var ix = x + l, iy = y + t, iw = w - l - r, ih = h - t - b;
+        return this.path(P.line(x, y, x + w, y) + P('v', h) + P('h', -w) + P('v', -h) +
+                         P.line(ix, iy, ix, iy + ih) + P('h', iw) + P('v', -ih) + P('h', -iw))
+      }
+    },
+    circleX: function (box, p, big) {
+      var o = big ? Math.max : Math.min;
+      with (box || this.bbox())
+        return this.circle(box.midX, box.midY, def(p, 1) * o(w, h) / 2)
+    },
+    ellipseX: function (box, px, py) {
+      with (box || this.bbox())
+        return this.ellipse(midX, midY, def(px, 1) * w / 2, def(py, 1) * h / 2)
+    },
+    iconX: function (box) {
+      with (box || this.bbox())
+        return this.icon(x, y, w, h, name)
+    },
+    rectX: function (box) {
+      with (box || this.bbox())
+        return this.rect(x, y, w, h)
+    },
+    textX: function (box, text, cx, cy) {
+      with (box || this.bbox())
+        return this.text(midX + (cx || 0) * w / 2, midY + (cy || 0) * h / 2, text).anchor(cx, cy)
+    },
+
+    anchor: function (i, j) {
+      var a = i < 0 ? 'start' : (i > 0 ? 'end' : 'middle')
+      var b = j < 0 ? 'hanging' : (j > 0 ? 'alphabetic' : 'central')
+      return this.attrs({'text-anchor': a, 'dominant-baseline': b})
+    },
     bbox: function () {
       return new Box(this.node.getBBox())
     },
@@ -341,6 +389,7 @@
     polar: function (r, a) {
       return [r * trig.cos(a), r * trig.sin(a)];
     },
+
     shift: function (dx, dy) {
       var x = this.transformation(), t = x.translate = x.translate || [0, 0]
       t[0] += dx || 0;
