@@ -175,7 +175,7 @@
 
           var bgrd = this.bgrd = elem.rect(x, y, w, h).attrs({fill: theme.tint})
           var tbar = this.tbar = elem.label(dims.midX, m, title).attrs({'font-weight': 700})
-          var line = this.line = elem.line(x, y + h, x + w, y + h).attrs({stroke: theme.line, 'stroke-width': .01})
+          var line = this.line = elem.rect(x, y + h - .1, w, .1).attrs({fill: theme.line})
 
           if (prev) {
             var back = this.back = elem.button(function () { nav.action('back')(state.data) })
