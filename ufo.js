@@ -10,6 +10,10 @@
       return this.g({cursor: 'pointer'}).tap(fun)
     },
 
+    label: function (cx, cy, text) {
+      return this.text(cx, cy, text).attrs({'text-anchor': 'middle', 'dominant-baseline': 'central'})
+    },
+
     icon: function (x, y, w, h, name) {
       return this.use(name).xywh(x, y, w, h)
     },
@@ -157,28 +161,28 @@
         xfer.call(this, percent = 0)
       }, {
         navbar: otype(function NavBar(win, opts) {
-          var x, y, w, h, f, d = win.dims;
+          var x, y, w, h, d = win.dims;
           var parent = this.parent = win;
           var opts = this.opts = up({}, opts)
           var dims = this.dims = Sky.box(x = d.x, y = d.y, w = d.w, h = .07 * d.h)
-          var elem = this.elem = win.chrome.g({'font-size': f = 10})
+          var elem = this.elem = win.chrome.g({'font-size': 10})
 
-          var m = dims.midY + f / 3;
+          var m = dims.midY;
           var state = win.state, nav = state.nav, page = nav.pages[state.tag], prev = state.prev;
           var title = opts.title || page.title, right = opts.right;
           var theme = this.theme({link: 'blue', tint: '#fdfdfd'})
 
           var bgrd = this.bgrd = elem.rect(x, y, w, h).attrs({fill: theme.tint})
-          var tbar = this.tbar = elem.text(dims.midX, m, title).attrs({'text-anchor': 'middle', 'font-weight': 700})
+          var tbar = this.tbar = elem.label(dims.midX, m, title).attrs({'font-weight': 700})
 
           if (prev) {
             var back = this.back = elem.button(function () { nav.action('back')(state.data) })
-            back.chevron(x + 6, dims.midY, -5).attrs({stroke: theme.link})
-            back.text(x + 12, m, nav.pages[prev.tag].title).attrs({'text-anchor': 'start', fill: theme.link})
+            back.chevron(x + 6, m, -5).attrs({stroke: theme.link})
+            back.label(x + 12, m, nav.pages[prev.tag].title).attrs({'text-anchor': 'start', fill: theme.link})
           }
           if (right) {
             var rbtn = this.rbtn = elem.button(function () { right.action() })
-            rbtn.text(dims.right - 6, m, right.label).attrs({'text-anchor': 'end', fill: theme.link})
+            rbtn.label(dims.right - 6, m, right.label).attrs({'text-anchor': 'end', fill: theme.link})
           }
 
           win.plugs.push({
