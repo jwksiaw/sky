@@ -1,23 +1,32 @@
 (function () {
-  var P = Sky.path, U = Sky.util, up = Sun.up, Cage = Sun.Cage;
+  var P = Sky.path, U = Sky.util, def = U.def, up = Sun.up, Cage = Sun.Cage;
 
   up(Sky.SVGElem.prototype, {
-    chevron: function (cx, cy, w, h) {
-      return this.path(P.chevron(cx, cy, w, h)).attrs({fill: 'none', 'stroke-width': 1.5})
+    border: function (t, r, b, l, box) {
+      var t = def(t, 0), r = def(r, t), b = def(b, t), l = def(l, r)
+      with (box || this.bbox()) {
+        var ix = x + l, iy = y + t, iw = w - l - r, ih = h - t - b;
+        return this.path(P.line(x, y, x + w, y) + P('v', h) + P('h', -w) + P('v', -h) +
+                         P.line(ix, iy, ix, iy + ih) + P('h', iw) + P('v', -ih) + P('h', -iw))
+      }
     },
 
     button: function (fun) {
       return this.g({cursor: 'pointer'}).tap(fun)
     },
 
-    label: function (cx, cy, text, da) {
-      var anchor = da > 0 ? 'start' : (da < 0 ? 'end' : 'middle')
-      return this.text(cx, cy, text).attrs({'text-anchor': anchor, 'dominant-baseline': 'central'})
+    chevron: function (cx, cy, w, h) {
+      return this.path(P.chevron(cx, cy, w, h)).attrs({fill: 'none', 'stroke-width': 1.5})
     },
 
     icon: function (x, y, w, h, name) {
       return this.use(name).xywh(x, y, w, h)
     },
+
+    label: function (cx, cy, text, da) {
+      var anchor = da > 0 ? 'start' : (da < 0 ? 'end' : 'middle')
+      return this.text(cx, cy, text).attrs({'text-anchor': anchor, 'dominant-baseline': 'central'})
+    }
   })
 
   var Nav = Sun.cls(function Nav(init, state, frame) {
@@ -175,7 +184,7 @@
 
           var bgrd = this.bgrd = elem.rect(x, y, w, h).attrs({fill: theme.tint})
           var tbar = this.tbar = elem.label(dims.midX, m, title).attrs({'font-weight': 700})
-          var line = this.line = elem.rect(x, y + h - .1, w, .1).attrs({fill: theme.line})
+          var line = this.line = elem.border(0, 0, .1, 0).attrs({fill: theme.line})
 
           if (prev) {
             var back = this.back = elem.button(function () { nav.action('back')(state.data) })

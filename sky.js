@@ -125,7 +125,7 @@
     },
     rect: function (elem) { with (this) return elem.rect(x, y, w, h) },
     toString: function () { with (this) return x + ',' + y + ',' + w + ',' + h }
-  };
+  }
 
   function RGB(d) { up(this, d) }
   RGB.mix = function (x, opts) {
