@@ -171,10 +171,11 @@
           var m = dims.midY;
           var state = win.state, nav = state.nav, page = nav.pages[state.tag], prev = state.prev;
           var title = opts.title || page.title, right = opts.right;
-          var theme = this.theme({link: 'blue', tint: '#fdfdfd'})
+          var theme = this.theme({link: 'blue', tint: '#fdfdfd', line: '#101010'})
 
           var bgrd = this.bgrd = elem.rect(x, y, w, h).attrs({fill: theme.tint})
           var tbar = this.tbar = elem.label(dims.midX, m, title).attrs({'font-weight': 700})
+          var line = this.line = elem.line(x, y + h, x + w, y + h).attrs({stroke: theme.line, 'stroke-width': .01})
 
           if (prev) {
             var back = this.back = elem.button(function () { nav.action('back')(state.data) })
