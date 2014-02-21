@@ -172,10 +172,12 @@
             var back = this.back = elem.button(function () { nav.action('back')(state.data) })
             back.chevron(x + 6, m, -5).attrs({stroke: theme.link})
             back.label(x + 12, m, nav.pages[prev.tag].title, -1).attrs({fill: theme.link})
+            back.rectX().attrs({fill: theme.tint}).insert(0)
           }
           if (right) {
             var rbtn = this.rbtn = elem.button(function () { right.action() })
             rbtn.label(dims.right - 6, m, right.label, 1).attrs({fill: theme.link})
+            rbtn.rectX().attrs({fill: theme.tint}).insert(0)
           }
 
           win.plugs.push({
