@@ -136,6 +136,11 @@
       var t = t || 0, r = r || 0, b = b || 0, l = l || 0;
       return new Box({x: this.x + l, y: this.y + t, w: this.w - r - l, h: this.h - t - b})
     },
+    copy: function (o) {
+      var o = o || {}, ow = def(o.w, o.width), oh = def(o.h, o.height)
+      with (this)
+        return new Box({x: def(o.x, x), y: def(o.y, y), w: def(ow, w), h: def(oh, h)})
+    },
     toString: function () { with (this) return x + ',' + y + ',' + w + ',' + h }
   }
 
