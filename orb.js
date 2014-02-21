@@ -67,7 +67,7 @@
         },
         free: function () {
           if (open)
-            fun && fun.apply(self, arguments)
+            fun && fun.apply(this, arguments)
           open = false;
         }
       }))
