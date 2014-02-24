@@ -34,7 +34,7 @@
     join: function () {
       return [].reduce.call(arguments, function (d, a) { return d + P.apply(null, a) }, '')
     },
-    line: function (x1, y1, x2, y2) {
+    line: function (x1, y1, x2, y2, open) {
       var open = open || P.M;
       return open([x1, y1]) + P.L([x2, y2])
     },
@@ -42,6 +42,14 @@
       var open = open || P.M;
       var h = def(h, w)
       return open([x, y]) + P('H', x + w) + P('V', y + h) + P('H', x) + 'Z';
+    },
+    border: function (box, t, r, b, l, open) {
+      var t = def(t, 0), r = def(r, t), b = def(b, t), l = def(l, r)
+      with (box) {
+        var ix = x + l, iy = y + t, iw = w - l - r, ih = h - t - b;
+        return (P.line(x, y, x + w, y, open) + P('v', h) + P('h', -w) + P('v', -h) +
+                P.line(ix, iy, ix, iy + ih) + P('h', iw) + P('v', -ih) + P('h', -iw))
+      }
     },
     chevron: function (cx, cy, w, h, open) {
       var open = open || P.M;
@@ -346,12 +354,7 @@
     },
 
     border: function (t, r, b, l, box) {
-      var t = def(t, 0), r = def(r, t), b = def(b, t), l = def(l, r)
-      with (box || this.bbox()) {
-        var ix = x + l, iy = y + t, iw = w - l - r, ih = h - t - b;
-        return this.path(P.line(x, y, x + w, y) + P('v', h) + P('h', -w) + P('v', -h) +
-                         P.line(ix, iy, ix, iy + ih) + P('h', iw) + P('v', -ih) + P('h', -iw))
-      }
+      return this.path(P.border(box || this.bbox(), t, r, b, l))
     },
     circleX: function (box, p, big) {
       var o = big ? Math.max : Math.min;
