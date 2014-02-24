@@ -170,6 +170,7 @@
   }
   Elem.prototype.update = function (obj) { return up(this, obj) }
   Elem.prototype.update({
+    xml: "http://www.w3.org/XML/1998/namespace",
     xmlns: "http://www.w3.org/1999/xhtml",
     addTo: function (parent) {
       return (parent.node || parent).appendChild(this.node), this;
@@ -208,6 +209,9 @@
       for (var k in attrs)
         this.node.style[k] = attrs[k];
       return this;
+    },
+    space: function (space) {
+      this.attrs({space: space}, this.xml)
     },
     animate: function (fun, n) {
       var self = this, i = 0;
