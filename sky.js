@@ -211,7 +211,7 @@
       return this;
     },
     space: function (space) {
-      this.attrs({space: space}, this.xml)
+      return this.attrs({space: space}, this.xml)
     },
     animate: function (fun, n) {
       var self = this, i = 0;
