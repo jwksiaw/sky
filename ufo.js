@@ -192,6 +192,7 @@
 
   UFO = {
     Nav: Nav,
+    type: otype,
     iOS7x: iOS7x
   }
 })();
