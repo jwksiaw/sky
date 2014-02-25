@@ -140,6 +140,16 @@
       var o = big ? Math.max : Math.min, d = o(this.w, this.h)
       return new Box({x: this.x, y: this.y, w: d, h: d})
     },
+    part: function (ps, hzn) {
+      var b = this, ko = hzn ? 'x' : 'y', kd = hzn ? 'w' : 'h';
+      var o = b[ko], u = {}, s = 0, ps = [].concat(ps, undefined)
+      return ps.map(function (p, i) {
+        u[ko] = (o += u[kd] || 0)
+        u[kd] = def(p, 1 - s) * b[kd]
+        s += p;
+        return b.copy(u)
+      })
+    },
     trim: function (t, r, b, l) {
       var t = t || 0, r = r || 0, b = b || 0, l = l || 0;
       return new Box({x: this.x + l, y: this.y + t, w: this.w - r - l, h: this.h - t - b})
