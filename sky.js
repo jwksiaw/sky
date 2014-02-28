@@ -112,9 +112,10 @@
       var o = up({rows: 1, cols: 1}, opts)
       var r = o.rows, c = o.cols;
       var x = this.x, y = this.y, w = this.w / c, h = this.h / r;
+      var z = new Box({x: x, y: y, w: w, h: h})
       for (var i = 0, n = 0; i < r; i++)
         for (var j = 0; j < c; j++, n++)
-          acc = fun(acc, new Box({x: x + w * j, y: y + h * i, w: w, h: h}), i, j, n, this)
+          acc = fun.call(this, acc, z.shift(w * j, h * i), i, j, n, z)
       return acc;
     },
     split: function (opts) {
