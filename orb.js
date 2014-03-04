@@ -336,25 +336,38 @@
         ymin = def(b.y, -Inf); ymax = def(b.y + b.height, Inf)
       }
       setBBox(opts.bbox || elem.bbox())
-      var rx = opts.rx || 1, ry = opts.ry || 1, tx = opts.tx || 1, ty = opts.ty || 1;
+      var rx = opts.rx || 1, ry = opts.ry || 1;
       var px = opts.px || 0, py = opts.py || 0;
       var plug = elem.orb({
         move: function (dx, dy) {
-          px += tx * dx;
-          py += ty * dy;
+          px += dx;
+          py += dy;
           return this.push(dx, dy)
         }
       }, cat(orb, jack))
       var coil = elem.spring(plug, {kx: 1, ky: 1, lx: -1, ly: -1, lock: true})
       this.jack = cat(plug, coil)
       this.move = function (dx, dy) {
-        var cx, cy, vx = tx * dx, vy = ty * dy;
-        if (px + vx < xmin && vx < 0 || px + vx > xmax && vx > 0)
-          cx = dx / (rx * log(abs(coil.dx) + E))
-        if (py + vy < ymin && vy < 0 || py + vy > ymax && vy > 0)
-          cy = dy / (ry * log(abs(coil.dy) + E))
+        var cx = 0, cy = 0, ix = dx, iy = dy;
+        var nx = px + dx, ny = py + dy;
+        var ux = nx - xmin, uy = ny - ymin;
+        var ox = nx - xmax, oy = ny - ymax;
+        if (ux < 0 && dx < 0) {
+          cx = (px < xmin ? dx : ux) / (rx * log(abs(coil.dx) + E))
+          ix = Math.min(dx - ux, 0)
+        } else if (ox > 0 && dx > 0) {
+          cx = (px > xmax ? dx : ox) / (rx * log(abs(coil.dx) + E))
+          ix = Math.max(dx - ox, 0)
+        }
+        if (uy < 0 && dy < 0) {
+          cy = (py < ymin ? dy : uy) / (ry * log(abs(coil.dy) + E))
+          iy = Math.min(dy - uy, 0)
+        } else if (oy > 0 && dy > 0) {
+          cy = (py > ymax ? dy : oy) / (ry * log(abs(coil.dy) + E))
+          iy = Math.max(dy - oy, 0)
+        }
         Orb.move(coil, cx, cy)
-        return Orb.move(plug, cx || dx, cy || dy)
+        return Orb.move(plug, cx + ix, cy + iy)
       }
     })
   })
