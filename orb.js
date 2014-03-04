@@ -1,7 +1,7 @@
 (function () {
   var def = Sky.util.def, clip = Sky.util.clip;
   var pop = Sky.util.pop, up = Sky.util.update;
-  var abs = Math.abs, log = Math.log;
+  var abs = Math.abs, log = Math.log, E = Math.E, Inf = Infinity;
   var sgn = function (x) { return x < 0 ? -1 : 1 }
   var cat = function (a, b) { return b ? [].concat(a, b) : a }
 
@@ -173,9 +173,13 @@
 
     spring: Orb.type(function Spring(elem, jack, opts) {
       var opts = up({}, opts)
+      var lock = opts.lock;
       var kx = opts.kx || 8, ky = opts.ky || 8;
+      var lx = opts.lx || 1, ly = opts.ly || 1;
       var tx = opts.tx || 1, ty = opts.ty || 1;
       var restore = opts.restore || function (dx, dy, mx, my) {
+        if (lock && this.grip)
+          return;
         if (mx > tx) dx /= kx * log(mx + 1)
         if (my > ty) dy /= ky * log(my + 1)
         this.dx -= dx;
@@ -191,8 +195,8 @@
       this.jack = jack;
       this.move = function (dx, dy) {
         var s = this;
-        s.dx += dx;
-        s.dy += dy;
+        s.dx += lx * dx;
+        s.dy += ly * dy;
         stretch && stretch.call(s)
         if (!anim) {
           perturb && perturb.call(s)
@@ -213,12 +217,12 @@
   Sky.SVGElem.prototype.update({
     dolly: Orb.type(function Dolly(elem, jack, opts) {
       var opts = up({}, opts)
-      var vbox = opts.vbox || elem.node.getBBox()
+      var vbox = opts.vbox || elem.bbox()
       var xmin, xmax, ymin, ymax;
       var setBBox = this.setBBox = function (bbox) {
         var b = bbox || {}
-        xmin = def(b.x, -Infinity); xmax = def(b.x + b.width - vbox.width, Infinity)
-        ymin = def(b.y, -Infinity); ymax = def(b.y + b.height - vbox.height, Infinity)
+        xmin = def(b.x, -Inf); xmax = def(b.x + b.width - vbox.width, Inf)
+        ymin = def(b.y, -Inf); ymax = def(b.y + b.height - vbox.height, Inf)
       }
       setBBox(opts.bbox)
 
@@ -237,8 +241,8 @@
       var xmin, xmax, ymin, ymax;
       var setBBox = this.setBBox = function (bbox) {
         var b = bbox || {}
-        xmin = def(b.x, -Infinity); xmax = def(b.x + b.width, Infinity)
-        ymin = def(b.y, -Infinity); ymax = def(b.y + b.height, Infinity)
+        xmin = def(b.x, -Inf); xmax = def(b.x + b.width, Inf)
+        ymin = def(b.y, -Inf); ymax = def(b.y + b.height, Inf)
       }
       setBBox(opts.bbox)
 
@@ -255,31 +259,36 @@
     loop: Orb.type(function Loop(elem, jack, opts) {
       var opts = up({}, opts)
       var bbox = opts.bbox || {}, wrap = opts.wrap || function () {}
-      var xmin = def(bbox.x, -Infinity), xmax = def(bbox.x + bbox.width, Infinity)
-      var ymin = def(bbox.y, -Infinity), ymax = def(bbox.y + bbox.height, Infinity)
+      var xmin = def(bbox.x, -Inf), xmax = def(bbox.x + bbox.width, Inf)
+      var ymin = def(bbox.y, -Inf), ymax = def(bbox.y + bbox.height, Inf)
       var wide = xmax - xmin, high = ymax - ymin;
 
       this.elem = elem;
       this.jack = jack;
       this.move = function (dx, dy, cur) {
         var off = cur.translate || [0, 0]
-        var ox = off[0], oy = off[1], over = true;
-        while (over) {
+        var ox = off[0], oy = off[1], over = true, trap;
+        while (over && !trap) {
           over = false;
           if (wide) {
-            if (ox < xmin)
-              over = wrap.call(this, +1, 0, ox += wide, oy) || true;
-            if (ox > xmax)
-              over = wrap.call(this, -1, 0, ox -= wide, oy) || true;
+            var wx = ox < xmin && 1 || ox > xmax && -1;
+            if (wx) {
+              over = true;
+              if (!(trap = wrap.call(this, wx, 0, ox, oy)))
+                ox += wx * wide;
+            }
           }
           if (high) {
-            if (oy < ymin)
-              over = wrap.call(this, 0, +1, ox, oy += high) || true;
-            if (oy > ymax)
-              over = wrap.call(this, 0, -1, ox, oy -= high) || true;
+            var wy = oy < ymin && 1 || oy > ymax && -1;
+            if (wy) {
+              over = true;
+              if (!(trap = wrap.call(this, 0, wy, ox, oy)))
+                oy += wy * high;
+            }
           }
         }
-        cur.translate = [ox, oy]
+        if (!trap)
+          cur.translate = [ox, oy]
         return this.push(dx, dy, cur) || cur;
       }
     })
@@ -288,12 +297,10 @@
   Orb.prototype.update({
     guide: Orb.type(function Guide(orb, jack, opts) {
       var opts = up({}, opts)
-      var elem = orb.elem;
-      var bbox = elem.node.getBBox(), lane = pop(opts, 'lane', {})
+      var elem = this.elem = orb.elem;
+      var bbox = elem.bbox(), lane = pop(opts, 'lane', {})
       var w = lane.width || bbox.width, h = lane.height || bbox.height;
       var balance = opts.balance, truncate = pop(opts, 'truncate')
-
-      var elem = this.elem = elem;
       var jack = this.jack = elem.spring(cat(orb, jack), up(opts, {
         balance: function () {
           var t = elem.transformation(), z = t.translate || [0, 0]
@@ -316,6 +323,38 @@
       this.slot = function () {
         var t = elem.transformation(), z = t.translate || [0, 0]
         return [~~((z[0] + jack.dx) / w), ~~((z[1] + jack.dy) / h)]
+      }
+    }),
+
+    tether: Orb.type(function Tether(orb, jack, opts) {
+      var opts = up({}, opts)
+      var elem = this.elem = orb.elem;
+      var xmin, xmax, ymin, ymax;
+      var setBBox = this.setBBox = function (bbox) {
+        var b = bbox || {}
+        xmin = def(b.x, -Inf); xmax = def(b.x + b.width, Inf)
+        ymin = def(b.y, -Inf); ymax = def(b.y + b.height, Inf)
+      }
+      setBBox(opts.bbox || elem.bbox())
+      var kx = opts.kx || 1, ky = opts.ky || 1, tx = opts.tx || 1, ty = opts.ty || 1;
+      var px = opts.px || 0, py = opts.py || 0;
+      var plug = elem.orb({
+        move: function (dx, dy) {
+          px += tx * dx;
+          py += ty * dy;
+          return this.push(dx, dy)
+        }
+      }, cat(orb, jack))
+      var coil = elem.spring(plug, {kx: 1, ky: 1, lx: -1, ly: -1, lock: true})
+      this.jack = cat(plug, coil)
+      this.move = function (dx, dy) {
+        var cx, cy, vx = tx * dx, vy = ty * dy;
+        if (px + vx < xmin && vx < 0 || px + vx > xmax && vx > 0)
+          cx = dx / (kx * log(abs(coil.dx) + E))
+        if (py + vy < ymin && vy < 0 || py + vy > ymax && vy > 0)
+          cy = dy / (ky * log(abs(coil.dy) + E))
+        Orb.move(coil, cx, cy)
+        return Orb.move(plug, cx || dx, cy || dy)
       }
     })
   })
