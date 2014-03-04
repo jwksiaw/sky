@@ -336,7 +336,7 @@
         ymin = def(b.y, -Inf); ymax = def(b.y + b.height, Inf)
       }
       setBBox(opts.bbox || elem.bbox())
-      var kx = opts.kx || 1, ky = opts.ky || 1, tx = opts.tx || 1, ty = opts.ty || 1;
+      var rx = opts.rx || 1, ry = opts.ry || 1, tx = opts.tx || 1, ty = opts.ty || 1;
       var px = opts.px || 0, py = opts.py || 0;
       var plug = elem.orb({
         move: function (dx, dy) {
@@ -350,9 +350,9 @@
       this.move = function (dx, dy) {
         var cx, cy, vx = tx * dx, vy = ty * dy;
         if (px + vx < xmin && vx < 0 || px + vx > xmax && vx > 0)
-          cx = dx / (kx * log(abs(coil.dx) + E))
+          cx = dx / (rx * log(abs(coil.dx) + E))
         if (py + vy < ymin && vy < 0 || py + vy > ymax && vy > 0)
-          cy = dy / (ky * log(abs(coil.dy) + E))
+          cy = dy / (ry * log(abs(coil.dy) + E))
         Orb.move(coil, cx, cy)
         return Orb.move(plug, cx || dx, cy || dy)
       }
