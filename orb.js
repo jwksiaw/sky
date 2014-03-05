@@ -256,6 +256,10 @@
         Orb.move(coil, cx, cy)
         return Orb.move(plug, cx + ix, cy + iy)
       }
+
+      this.goto = function (x, y) {
+        return Orb.move(this, (x || 0) - (px + coil.dx), (y || 0) - (py + coil.dy))
+      }
     })
   })
 
