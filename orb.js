@@ -241,17 +241,17 @@
         var ox = nx - xmax, oy = ny - ymax;
         if (ux < 0 && dx < 0) {
           cx = (px < xmin ? dx : ux) / (rx * log(abs(coil.dx) + E))
-          ix = Math.min(dx - ux, 0)
+          ix = Math.min(dx - ux - coil.dx, 0)
         } else if (ox > 0 && dx > 0) {
           cx = (px > xmax ? dx : ox) / (rx * log(abs(coil.dx) + E))
-          ix = Math.max(dx - ox, 0)
+          ix = Math.max(dx - ox - coil.dx, 0)
         }
         if (uy < 0 && dy < 0) {
           cy = (py < ymin ? dy : uy) / (ry * log(abs(coil.dy) + E))
-          iy = Math.min(dy - uy, 0)
+          iy = Math.min(dy - uy - coil.dy, 0)
         } else if (oy > 0 && dy > 0) {
           cy = (py > ymax ? dy : oy) / (ry * log(abs(coil.dy) + E))
-          iy = Math.max(dy - oy, 0)
+          iy = Math.max(dy - oy - coil.dy, 0)
         }
         Orb.move(coil, cx, cy)
         return Orb.move(plug, cx + ix, cy + iy)
