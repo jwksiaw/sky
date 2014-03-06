@@ -18,8 +18,11 @@
     this.frame = frame;
   }, new Cage, {
     action: function () {
+      return this.segue(this.bind.apply(this, arguments))
+    },
+
+    segue: function (fn) {
       var self = this;
-      var fn = this.bind.apply(this, arguments)
       return function () {
         var orb = fn.apply(self, arguments)
         Orb.grab(orb)
