@@ -218,13 +218,13 @@
       var rx = opts.rx || 1, ry = opts.ry || 1;
       var px = opts.px || 0, py = opts.py || 0;
       var xmin, xmax, ymin, ymax;
-      var setBBox = this.setBBox = function (bbox) {
+      this.setBBox = function (bbox) {
         var b = bbox || {}
         xmin = def(b.x, -Inf); xmax = def(b.x + b.width, Inf)
         ymin = def(b.y, -Inf); ymax = def(b.y + b.height, Inf)
         if (px < xmin || px > xmax || py < ymin || py > ymax)
-          this.goto(px < xmin ? xmin : (py > xmax ? xmax : 0),
-                    py < ymin ? ymin : (py > ymax ? ymax : 0))
+          this.goto(px < xmin ? xmin : (py > xmax ? xmax : px),
+                    py < ymin ? ymin : (py > ymax ? ymax : py))
       }
       var plug = elem.orb({
         move: function (dx, dy) {
@@ -263,7 +263,7 @@
         return Orb.move(this, (x || 0) - (px + coil.dx), (y || 0) - (py + coil.dy))
       }
 
-      setBBox(opts.bbox || elem.bbox())
+      this.setBBox(opts.bbox || elem.bbox())
     })
   })
 
@@ -352,28 +352,29 @@
       this.jack = jack;
       this.move = function (dx, dy, cur) {
         var off = cur.translate || [0, 0]
-        var ox = off[0], oy = off[1], over = true, trap;
-        while (over && !trap) {
+        var ox = off[0], oy = off[1], lx = ox, ly = oy, over = true;
+        while (over) {
           over = false;
           if (wide) {
-            var wx = ox < xmin && 1 || ox > xmax && -1;
+            var wx = lx < xmin && 1 || lx > xmax && -1;
             if (wx) {
               over = true;
-              if (!(trap = wrap.call(this, wx, 0, ox, oy)))
+              lx += wx * wide;
+              if (!wrap.call(this, wx, 0, ox, oy))
                 ox += wx * wide;
             }
           }
           if (high) {
-            var wy = oy < ymin && 1 || oy > ymax && -1;
+            var wy = ly < ymin && 1 || ly > ymax && -1;
             if (wy) {
               over = true;
-              if (!(trap = wrap.call(this, 0, wy, ox, oy)))
+              ly += wy * high;
+              if (!wrap.call(this, 0, wy, ox, oy))
                 oy += wy * high;
             }
           }
         }
-        if (!trap)
-          cur.translate = [ox, oy]
+        cur.translate = [ox, oy]
         return this.push(dx, dy, cur) || cur;
       }
     })
