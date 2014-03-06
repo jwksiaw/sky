@@ -215,15 +215,17 @@
 
     tether: Orb.type(function Tether(elem, jack, opts) {
       var opts = up({}, opts)
+      var rx = opts.rx || 1, ry = opts.ry || 1;
+      var px = opts.px || 0, py = opts.py || 0;
       var xmin, xmax, ymin, ymax;
       var setBBox = this.setBBox = function (bbox) {
         var b = bbox || {}
         xmin = def(b.x, -Inf); xmax = def(b.x + b.width, Inf)
         ymin = def(b.y, -Inf); ymax = def(b.y + b.height, Inf)
+        if (px < xmin || px > xmax || py < ymin || py > ymax)
+          this.goto(px < xmin ? xmin : (py > xmax ? xmax : 0),
+                    py < ymin ? ymin : (py > ymax ? ymax : 0))
       }
-      setBBox(opts.bbox || elem.bbox())
-      var rx = opts.rx || 1, ry = opts.ry || 1;
-      var px = opts.px || 0, py = opts.py || 0;
       var plug = elem.orb({
         move: function (dx, dy) {
           px += dx;
@@ -260,6 +262,8 @@
       this.goto = function (x, y) {
         return Orb.move(this, (x || 0) - (px + coil.dx), (y || 0) - (py + coil.dy))
       }
+
+      setBBox(opts.bbox || elem.bbox())
     })
   })
 
