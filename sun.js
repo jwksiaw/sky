@@ -167,6 +167,11 @@
   var L = Sun.lists = {
     last: function (list, n) { return list[list.length - (n || 1)] },
     append: function (list, item) { return list.push(item) && list },
+    drop: function (list, item) {
+      var i = list.indexOf(item)
+      if (i >= 0)
+        return list.splice(i, 1)[0]
+    },
     groupby: function (list, key) {
       var k, key = key || function (item) { return item[0] }
       return list.reduce(function (acc, item) {
@@ -197,7 +202,7 @@
     keydrop: function (list, val, key, eq) {
       var i = L.keyindex(list, val, key, eq)
       if (i >= 0)
-        return list.splice(i, 1)[0];
+        return list.splice(i, 1)[0]
     },
     keyfind: function (list, val, key, eq) {
       var i = L.keyindex(list, val, key, eq)
