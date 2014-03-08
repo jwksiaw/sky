@@ -34,6 +34,7 @@
           return o.reduce(function (_, i) { return Orb.do(i, f, a) }, 0)
       }
     },
+    call: function (o, f) { return Orb.do(o, f, [].slice.call(arguments, 2)) },
     grab: function (o) { return Orb.do(o, 'grab', [].slice.call(arguments, 1)) },
     free: function (o) { return Orb.do(o, 'free', [].slice.call(arguments, 1)) },
     move: function (o, dx, dy, a, r, g, s) {
