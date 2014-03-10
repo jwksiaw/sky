@@ -141,10 +141,17 @@
       var o = big ? Math.max : Math.min, d = o(this.w, this.h)
       return new Box({x: this.x, y: this.y, w: d, h: d})
     },
+    slice: function (ps, hzn) {
+      var d = hzn ? this.w : this.h;
+      return this.part(ps.map(function (p) {
+        var pct = typeof(p) == 'string' && p[p.length - 1] == '%';
+        return pct ? parseFloat(p.slice(0, -1)) / 100 : p / d;
+      }), hzn)
+    },
     part: function (ps, hzn) {
       var b = this, ko = hzn ? 'x' : 'y', kd = hzn ? 'w' : 'h';
       var o = b[ko], u = {}, s = 0, ps = [].concat(ps, undefined)
-      return ps.map(function (p, i) {
+      return ps.map(function (p) {
         u[ko] = (o += u[kd] || 0)
         u[kd] = def(p, 1 - s) * b[kd]
         s += p;

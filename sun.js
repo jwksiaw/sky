@@ -116,10 +116,9 @@
       return this.til(keys, fun, function () { return n++ })
     },
     til: function (keys, fun, dead) {
-      var cage = this;
-      cage.on(keys, function () {
+      this.on(keys, function () {
         if (dead())
-          cage.off(keys, arguments.callee)
+          this.off(keys, arguments.callee)
         else
           fun.apply(this, arguments)
       })
