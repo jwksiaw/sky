@@ -221,18 +221,13 @@
       var w = lane.width || bbox.width, h = lane.height || bbox.height;
       var px = this.px = opts.px || 0, py = this.py || 0;
       var balance = opts.balance, truncate = pop(opts, 'truncate')
-      var hook = elem.orb({
-        move: function (dx, dy) {
-          Orb.move(self.hook, dx, dy)
-          this.push(dx, dy)
-        }
-      }, self)
       var spring = elem.spring(jack, up(opts, {
         balance: function () {
           var ox = w && px % w, oy = h && py % h;
           if (abs(ox) > 1e-3 || abs(oy) > 1e-3)
-            hook.move(abs(ox) < w / 2 && !truncate ? -ox : sgn(ox) * w - ox,
-                      abs(oy) < h / 2 && !truncate ? -oy : sgn(oy) * h - oy)
+            Orb.move(self.hook || self,
+                     abs(ox) < w / 2 && !truncate ? -ox : sgn(ox) * w - ox,
+                     abs(oy) < h / 2 && !truncate ? -oy : sgn(oy) * h - oy)
           else
             elem.trigger('settle', [~~(px / w), ~~(py / h)])
           balance && balance.call(this)
