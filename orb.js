@@ -214,6 +214,42 @@
       }
     }),
 
+    guide: Orb.type(function Guide(elem, jack, opts) {
+      var self = this;
+      var opts = up({}, opts)
+      var lane = pop(opts, 'lane', {}), bbox = opts.bbox || elem.bbox()
+      var w = lane.width || bbox.width, h = lane.height || bbox.height;
+      var px = this.px = opts.px || 0, py = this.py || 0;
+      var balance = opts.balance, truncate = pop(opts, 'truncate')
+      var spring = elem.spring(jack, up(opts, {
+        balance: function () {
+          var ox = w && px % w, oy = h && py % h;
+          if (abs(ox) > 1e-3 || abs(oy) > 1e-3)
+            self.move(abs(ox) < w / 2 && !truncate ? -ox : sgn(ox) * w - ox,
+                      abs(oy) < h / 2 && !truncate ? -oy : sgn(oy) * h - oy)
+          else
+            elem.trigger('settle', [~~(px / w), ~~(py / h)])
+          balance && balance.call(this)
+        }
+      }))
+
+      this.elem = elem;
+      this.jack = spring;
+      this.move = function (dx, dy) {
+        self.px = px += dx;
+        self.py = py += dy;
+        self.push(dx, dy)
+      }
+      this.goto = function (i, j) {
+        var ox = px + spring.dx - (i || 0) * w, oy = py + spring.dy - (j || 0) * h;
+        self.move(-ox, -oy)
+      }
+
+      this.slot = function () {
+        return [~~((px + spring.dx) / w), ~~((py + spring.dy) / h)]
+      }
+    }),
+
     tether: Orb.type(function Tether(elem, jack, opts) {
       var self = this;
       var opts = up({}, opts)
@@ -308,38 +344,6 @@
         cur.translate = [clip(off[0] + dx, xmin, xmax),
                          clip(off[1] + dy, ymin, ymax)]
         elem.transform(this.push(dx, dy, cur) || cur)
-      }
-    }),
-
-    guide: Orb.type(function Guide(elem, jack, opts) {
-      var opts = up({}, opts)
-      var bbox = elem.bbox(), lane = pop(opts, 'lane', {})
-      var w = lane.width || bbox.width, h = lane.height || bbox.height;
-      var balance = opts.balance, truncate = pop(opts, 'truncate')
-      var spring = elem.spring(jack, up(opts, {
-        balance: function () {
-          var t = elem.transformation(), z = t.translate || [0, 0]
-          var ox = w && z[0] % w, oy = h && z[1] % h;
-          if (abs(ox) > 1e-3 || abs(oy) > 1e-3)
-            this.move(abs(ox) < w / 2 && !truncate ? -ox : sgn(ox) * w - ox,
-                      abs(oy) < h / 2 && !truncate ? -oy : sgn(oy) * h - oy)
-          else
-            elem.trigger('settle', [~~(z[0] / w), ~~(z[1] / h)])
-          balance && balance.call(this)
-        }
-      }))
-
-      this.elem = elem;
-      this.jack = spring;
-      this.goto = function (i, j) {
-        var t = elem.transformation(), z = t.translate || [0, 0]
-        var ox = z[0] + spring.dx - (i || 0) * w, oy = z[1] + spring.dy - (j || 0) * h;
-        this.move(-ox, -oy)
-      }
-
-      this.slot = function () {
-        var t = elem.transformation(), z = t.translate || [0, 0]
-        return [~~((z[0] + spring.dx) / w), ~~((z[1] + spring.dy) / h)]
       }
     }),
 

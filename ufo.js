@@ -91,8 +91,6 @@
 
         var self = this;
         var xfer, percent;
-        if (!frame.top)
-          frame.change('top', this)
         this.state = up(state, {win: this})
         this.jack = elem.spring(elem.orb({
           move: function (dx) { xfer.call(this, percent = U.clip(percent + dx, 0, 100)) }
@@ -153,6 +151,8 @@
           }
           break;
         }
+        if (!frame.top)
+          frame.change('top', this)
         xfer.call(this, percent = 0)
       }, {
         navbar: otype(function NavBar(win, opts) {
@@ -190,7 +190,7 @@
           })
         })
       })
-    }),
+    })
   }
 
   UFO = {
