@@ -54,20 +54,19 @@
   Sky.Elem.prototype.update({
     tap: function (fun, opts) {
       var opts = up({gap: 250, mx: 1, my: 1}, opts)
-      var open, Dx = 0, Dy = 0;
+      var open, Dx, Dy;
       return this.swipe(this.orb({
         grab: function () {
+          Dx = Dy = 0;
           open = true;
           setTimeout(function () { open = false }, opts.gap)
         },
         move: function (dx, dy) {
           Dx += abs(dx)
           Dy += abs(dy)
-          if (Dx > opts.mx || Dy > opts.my)
-            open = false;
         },
         free: function () {
-          if (open)
+          if (open && Dx <= opts.mx && Dy <= opts.my)
             fun && fun.apply(this, arguments)
           open = false;
         }
