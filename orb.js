@@ -219,17 +219,19 @@
       var lane = pop(opts, 'lane', {}), bbox = opts.bbox || elem.bbox()
       var w = lane.width || bbox.width, h = lane.height || bbox.height;
       var px = this.px = opts.px || 0, py = this.py || 0;
+      var mx = opts.mx || 1e-3, my = opts.my || 1e-3, dist = Sun.clockdist;
       var balance = opts.balance, truncate = pop(opts, 'truncate')
       var spring = elem.spring(jack, up(opts, {
         balance: function () {
           var ox = w && px % w, oy = h && py % h;
-          if (abs(ox) > 1e-3 || abs(oy) > 1e-3)
+          var far = dist(ox, 0, w) > mx || dist(oy, 0, h) > my;
+          if (far)
             Orb.move(self.hook || self,
                      abs(ox) < w / 2 && !truncate ? -ox : sgn(ox) * w - ox,
                      abs(oy) < h / 2 && !truncate ? -oy : sgn(oy) * h - oy)
-          else
+          if (!far)
             elem.trigger('settle', [~~(px / w), ~~(py / h)])
-          balance && balance.call(this)
+          balance && balance.call(this, ox, oy)
         }
       }))
 
