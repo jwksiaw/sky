@@ -8,7 +8,7 @@
   var touch = 'ontouchstart' in window;
   var pointerdown = touch ? 'touchstart' : 'mousedown';
   var pointermove = touch ? 'touchmove' : 'mousemove';
-  var pointerup = touch ? 'touchend' : 'mouseup';
+  var pointerup = touch ? 'touchend touchcancel' : 'mouseup';
 
   Orb = function Orb(obj, jack, elem) {
     this.jack = jack || this.jack;
