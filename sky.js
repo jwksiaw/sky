@@ -120,7 +120,7 @@
     },
     stack: function (fun, acc, opts) {
       var o = up({rows: 1, cols: 1}, opts)
-      return this.copy({w: o.cols * this.w, h: o.rows * this.h}).grid(fun, acc, opts)
+      return this.copy({w: o.cols * this.w, h: o.rows * this.h}).grid(fun, acc, o)
     },
     split: function (opts) {
       return this.grid(function (acc, box) { return acc.push(box), acc }, [], opts)
