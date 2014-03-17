@@ -118,6 +118,10 @@
           acc = fun.call(this, acc, z.shift(w * j, h * i), i, j, n, z)
       return acc;
     },
+    stack: function (fun, acc, opts) {
+      var o = up({rows: 1, cols: 1}, opts)
+      return this.copy({w: o.cols * this.w, h: o.rows * this.h}).grid(fun, acc, opts)
+    },
     split: function (opts) {
       return this.grid(function (acc, box) { return acc.push(box), acc }, [], opts)
     },
