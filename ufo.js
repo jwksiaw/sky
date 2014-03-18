@@ -139,6 +139,7 @@
         case 'new':
           xfer = function (p) {
             elem.transform({translate: [0, (1 - p / 100) * dims.h]})
+            this.push(0, 1 - p / 100)
           }
           break;
 
@@ -146,8 +147,10 @@
         default:
           elem.insert(0)
           xfer = function (p) {
-            if (frame.top)
+            if (frame.top) {
               frame.top.elem.transform({translate: [0, p / 100 * dims.h]})
+              Orb.move(frame.top.plugs, 0, p / 100)
+            }
           }
           break;
         }
