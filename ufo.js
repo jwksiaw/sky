@@ -43,6 +43,11 @@
       return this.pages[state.tag].draw(win) || win;
     },
 
+    reload: function (data) {
+      var state = data ? up(this.state, {data: data}) : this.state;
+      return this.load(state)
+    },
+
     step: function (tag, data) {
       var state = {tag: tag, data: data, prev: this.state, parent: this.state.parent}
       return this.load(state, {transition: 'next'})
@@ -144,7 +149,6 @@
           break;
 
         case 'old':
-        default:
           elem.insert(0)
           xfer = function (p) {
             if (frame.top) {
@@ -153,6 +157,8 @@
             }
           }
           break;
+        default:
+          xfer = function (p) {}
         }
         if (!frame.top)
           frame.change('top', this)
