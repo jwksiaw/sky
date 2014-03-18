@@ -45,7 +45,7 @@
 
     reload: function (data) {
       var state = data ? up(this.state, {data: data}) : this.state;
-      return this.load(state)
+      return this.load(state, {transition: 'same'})
     },
 
     step: function (tag, data) {
@@ -116,6 +116,9 @@
         })
 
         switch (opts.transition) {
+        case 'same':
+          xfer = function (p) { this.push(0) }
+          break;
         case 'next':
           xfer = function (p) {
             if (frame.top) {
@@ -149,6 +152,7 @@
           break;
 
         case 'old':
+        default:
           elem.insert(0)
           xfer = function (p) {
             if (frame.top) {
@@ -157,8 +161,6 @@
             }
           }
           break;
-        default:
-          xfer = function (p) {}
         }
         if (!frame.top)
           frame.change('top', this)
