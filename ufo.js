@@ -175,14 +175,18 @@
 
           var m = dims.midY;
           var state = win.state, nav = state.nav, page = nav.pages[state.tag], prev = state.prev;
-          var title = opts.title || page.title, right = opts.right;
+          var title = opts.title || page.title, left = opts.left, right = opts.right;
           var theme = this.theme({link: 'blue', tint: '#fdfdfd', line: '#101010'})
 
           var bgrd = this.bgrd = elem.rect(x, y, w, h).attrs({fill: theme.tint})
           var tbar = this.tbar = elem.label(dims.midX, m, title).attrs({'font-weight': 700})
           var line = this.line = elem.border(0, 0, .1, 0).attrs({fill: theme.line})
 
-          if (prev) {
+          if (left) {
+            var lbtn = this.lbtn = elem.button(function () { left.action() })
+            lbtn.label(x + 6, m, left.label, -1).attrs({fill: theme.link})
+            lbtn.rectX().attrs({fill: theme.tint}).insert(0)
+          } else if (prev) {
             var back = this.back = elem.button(function () { nav.action('back')(state.data) })
             back.chevron(x + 6, m, -5).attrs({stroke: theme.link})
             back.label(x + 12, m, nav.pages[prev.tag].title, -1).attrs({fill: theme.link})
