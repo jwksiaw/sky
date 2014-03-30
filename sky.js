@@ -356,8 +356,8 @@
     g: function (attrs, props) {
       return this.child('g', attrs, props)
     },
-    image: function (href) {
-      return this.child('image').href(href)
+    image: function (x, y, w, h, href) {
+      return this.child('image').href(href).xywh(x, y, w, h)
     },
     link: function (href) {
       return this.child('a').href(href)
@@ -386,6 +386,10 @@
     ellipseX: function (box, px, py) {
       with (box || this.bbox())
         return this.ellipse(midX, midY, def(px, 1) * w / 2, def(py, 1) * h / 2)
+    },
+    imageX: function (box, href) {
+      with (box || this.bbox())
+        return this.image(x, y, w, h, href)
     },
     iconX: function (box, name) {
       with (box || this.bbox())
