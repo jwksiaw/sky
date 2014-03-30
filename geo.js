@@ -58,7 +58,7 @@
         return box.grid(function (a, b, i, j, k) {
           var m = 0, n = 0;
           var tile = tiles.g().transform({translate: [~~b.x, ~~b.y]})
-          var img = tile.image(mts.tile(b.x, b.y, z)).xywh(0, 0, b.w, b.h)
+          var img = tile.image(0, 0, b.w, b.h, mts.tile(b.x, b.y, z))
           var loop = tile.loop(null, {
             bbox: box,
             wrap: function (wx, wy) {
