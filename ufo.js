@@ -170,16 +170,16 @@
           var x, y, w, h, d = win.dims;
           var parent = this.parent = win;
           var opts = this.opts = up({}, opts)
-          var dims = this.dims = Sky.box(x = d.x, y = d.y, w = d.w, h = .07 * d.h)
+          var dims = this.dims = Sky.box(x = d.x, y = d.y, w = d.w, h = .1 * d.h)
           var elem = this.elem = win.chrome.g({'font-size': 10})
 
           var m = dims.midY;
           var state = win.state, nav = state.nav, page = nav.pages[state.tag], prev = state.prev;
           var title = opts.title || page.title, left = opts.left, right = opts.right;
-          var theme = this.theme({link: 'blue', tint: '#fdfdfd', line: '#101010'})
+          var theme = this.theme({link: 'blue', tint: '#f8f8f8', line: '#101010'})
 
           var bgrd = this.bgrd = elem.rect(x, y, w, h).attrs({fill: theme.tint})
-          var tbar = this.tbar = elem.label(dims.midX, m, title).attrs({'font-weight': 700})
+          var tbar = this.tbar = elem.label(dims.midX, m, title).attrs({'font-weight': 500})
           var line = this.line = elem.border(0, 0, .1, 0).attrs({fill: theme.line})
 
           if (left) {
