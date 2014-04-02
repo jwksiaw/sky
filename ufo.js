@@ -169,8 +169,8 @@
         navbar: otype(function NavBar(win, opts) {
           var x, y, w, h, d = win.dims;
           var parent = this.parent = win;
-          var opts = this.opts = up({}, opts)
-          var dims = this.dims = Sky.box(x = d.x, y = d.y, w = d.w, h = 20)
+          var opts = this.opts = up({height: 24}, opts)
+          var dims = this.dims = Sky.box(x = d.x, y = d.y, w = d.w, h = opts.height)
           var elem = this.elem = win.chrome.g({'font-size': 10})
 
           var m = dims.midY;
