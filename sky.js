@@ -146,7 +146,7 @@
       return new Box({x: this.x, y: this.y, w: d, h: d})
     },
     slice: function (ps, hzn) {
-      var d = hzn ? this.w : this.h, ps = [].concat(ps, undefined)
+      var d = hzn ? this.w : this.h, ps = [].concat(ps)
       return this.part(ps.map(function (p) {
         var pct = typeof(p) == 'string' && p[p.length - 1] == '%';
         return pct ? parseFloat(p.slice(0, -1)) / 100 : p / d;
