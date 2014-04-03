@@ -184,7 +184,7 @@
       }, [])
     },
     unique: function (list, eq) {
-      var eq = eq || function (a, b) { return a == b }
+      var eq = eq || function (a, b) { return a <= b && a >= b }
       var acc = list.slice(0, 1)
       for (var i = 1; i < list.length; i++)
         if (!eq(list[i], list[i - 1]))
