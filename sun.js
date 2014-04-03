@@ -183,13 +183,15 @@
         return acc;
       }, [])
     },
-    unique: function (list, eq) {
-      var eq = eq || function (a, b) { return a <= b && a >= b }
-      var acc = list.slice(0, 1)
-      for (var i = 1; i < list.length; i++)
-        if (!eq(list[i], list[i - 1]))
-          acc.push(list[i])
-      return acc;
+    unique: function (list, key) {
+      var keys = {}, key = key || function (item) { return item }
+      return list.reduce(function (acc, item) {
+        var k = key(item)
+        if (k in keys)
+          return acc;
+        keys[k] = true;
+        return acc.push(item), acc;
+      }, [])
     },
     insert: function (list, item, lte) {
       var lte = lte || function (a, b) { return a <= b }
