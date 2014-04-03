@@ -183,8 +183,16 @@
         return acc;
       }, [])
     },
-    insert: function (list, item, fun) {
-      var lte = fun || function (a, b) { return a <= b };
+    unique: function (list, eq) {
+      var eq = eq || function (a, b) { return a == b }
+      var acc = list.slice(0, 1)
+      for (var i = 1; i < list.length; i++)
+        if (!eq(list[i], list[i - 1]))
+          acc.push(list[i])
+      return acc;
+    },
+    insert: function (list, item, lte) {
+      var lte = lte || function (a, b) { return a <= b }
       for (var i = 0; i < list.length; i++)
         if (lte(item, list[i]))
           return list.splice(i, 0, item) && list;
