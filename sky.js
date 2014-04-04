@@ -1,4 +1,5 @@
 (function () {
+  var min = Math.min, max = Math.max;
   var def = function (x, d) { return isNaN(x) ? d : x }
   var get = function (a, k, d) { var v = a[k]; return v == undefined ? d : v }
   var pop = function (a, k, d) { var v = get(a, k, d); delete a[k]; return v }
@@ -16,7 +17,7 @@
     pre: pre,
     update: up,
     copy: function (b) { return up({}, b) },
-    clip: function (x, m, M) { return Math.min(Math.max(x, m), M) },
+    clip: function (x, m, M) { return min(max(x, m), M) },
     randInt: function (m, M) { return Math.round((M - m) * Math.random()) + m }
   }
 
@@ -118,6 +119,13 @@
           acc = fun.call(this, acc, z.shift(w * j, h * i), i, j, n, z)
       return acc;
     },
+    join: function (boxs) {
+      var boxs = [].concat(boxs)
+      var bnds = boxs.reduce(function (a, b) {
+        return {x: min(a.x, b.x), y: min(a.y, b.y), right: max(a.right, b.right), bottom: max(a.bottom, b.bottom)}
+      }, this)
+      return new Box({x: bnds.x, y: bnds.y, w: bnds.right - bnds.x, h: bnds.bottom - bnds.y})
+    },
     stack: function (fun, acc, opts) {
       var o = up({rows: 1, cols: 1}, opts)
       return this.copy({w: o.cols * this.w, h: o.rows * this.h}).grid(fun, acc, o)
@@ -142,7 +150,7 @@
       return new Box({x: this.x + (dx || 0), y: this.y + (dy || 0), w: this.w, h: this.h})
     },
     square: function (big) {
-      var o = big ? Math.max : Math.min, d = o(this.w, this.h)
+      var o = big ? max : min, d = o(this.w, this.h)
       return new Box({x: this.x, y: this.y, w: d, h: d})
     },
     slice: function (ps, hzn) {
@@ -379,7 +387,7 @@
       return this.path(P.border(box || this.bbox(), t, r, b, l))
     },
     circleX: function (box, p, big) {
-      var o = big ? Math.max : Math.min;
+      var o = big ? max : min;
       with (box || this.bbox())
         return this.circle(box.midX, box.midY, def(p, 1) * o(w, h) / 2)
     },
