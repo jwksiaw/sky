@@ -170,8 +170,11 @@
         return b.copy(u)
       })
     },
+    pad: function (t, r, b, l) {
+      return this.trim(-t, -r, -b, -l)
+    },
     trim: function (t, r, b, l) {
-      var t = t || 0, r = r || 0, b = b || 0, l = l || 0;
+      var t = def(t, 0), r = def(r, t), b = def(b, t), l = def(l, r)
       return new Box({x: this.x + l, y: this.y + t, w: this.w - r - l, h: this.h - t - b})
     },
     copy: function (o) {
