@@ -23,6 +23,7 @@
     grab: function () { this.grip++; return this.prop('grab', arguments) },
     free: function () { this.grip--; return this.prop('free', arguments) },
     move: function () { return this.prop('move', arguments) },
+    drag: function (f, a) { return Orb.drag(this, f, a) },
     walk: function (f, a) { return Orb.walk(this, f, a) }
   })
   Orb = up(Orb, {
@@ -40,6 +41,9 @@
     move: function (o, dx, dy, a, r, g, s) {
       return Orb.do(o, 'move', [dx || 0, dy || 0, a, r, g, s])
     },
+    drag: function (o, f, a) {
+      return Orb.grab(o), Orb.do(o, f, a), Orb.free(o), o;
+    },
     init: function (o) { Orb.call(o); return o },
     type: function (cons) {
       var proto = cons.prototype = new Orb;
@@ -56,10 +60,12 @@
       var opts = up({gap: 250, mx: 1, my: 1}, opts)
       var open, Dx, Dy;
       return this.swipe(this.orb({
-        grab: function () {
+        grab: function (e) {
           Dx = Dy = 0;
           open = true;
           setTimeout(function () { open = false }, opts.gap)
+          if (opts.stop)
+            e.stopImmediatePropagation()
           Orb.prototype.grab.apply(this, arguments)
         },
         move: function (dx, dy) {
@@ -67,13 +73,15 @@
           Dy += abs(dy)
           this.push(dx, dy)
         },
-        free: function () {
+        free: function (e) {
           if (open && Dx <= opts.mx && Dy <= opts.my)
             fun && fun.apply(this, arguments)
           open = false;
+          if (opts.stop)
+            e.stopImmediatePropagation()
           Orb.prototype.free.apply(this, arguments)
         }
-      }, jack))
+      }, jack), {stop: opts.stop})
     },
     dbltap: function (fun, opts) {
       var opts = up({gap: 250}, opts)

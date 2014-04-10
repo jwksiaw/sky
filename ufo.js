@@ -24,11 +24,7 @@
     segue: function (fn) {
       var self = this;
       return function () {
-        var orb = fn.apply(self, arguments)
-        Orb.grab(orb)
-        Orb.move(orb, 100)
-        Orb.free(orb)
-        return orb;
+        return Orb.drag(fn.apply(self, arguments), 'move', [100])
       }
     },
 
