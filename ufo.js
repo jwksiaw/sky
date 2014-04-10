@@ -2,8 +2,8 @@
   var P = Sky.path, U = Sky.util, up = Sun.up, Cage = Sun.Cage;
 
   up(Sky.SVGElem.prototype, {
-    button: function (fun, opts) {
-      return this.g({cursor: 'pointer'}).tap(fun, opts)
+    button: function (fun, opts, jack) {
+      return this.g({cursor: 'pointer'}).tap(fun, opts, jack)
     },
 
     chevron: function (cx, cy, w, h) {

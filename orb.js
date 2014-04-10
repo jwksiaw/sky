@@ -52,7 +52,7 @@
   })
 
   Sky.Elem.prototype.update({
-    tap: function (fun, opts) {
+    tap: function (fun, opts, jack) {
       var opts = up({gap: 250, mx: 1, my: 1}, opts)
       var open, Dx, Dy;
       return this.swipe(this.orb({
@@ -60,17 +60,20 @@
           Dx = Dy = 0;
           open = true;
           setTimeout(function () { open = false }, opts.gap)
+          Orb.prototype.grab.apply(this, arguments)
         },
         move: function (dx, dy) {
           Dx += abs(dx)
           Dy += abs(dy)
+          this.push(dx, dy)
         },
         free: function () {
           if (open && Dx <= opts.mx && Dy <= opts.my)
             fun && fun.apply(this, arguments)
           open = false;
+          Orb.prototype.free.apply(this, arguments)
         }
-      }))
+      }, jack))
     },
     dbltap: function (fun, opts) {
       var opts = up({gap: 250}, opts)
