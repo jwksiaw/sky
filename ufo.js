@@ -179,8 +179,6 @@
           var theme = this.theme({link: 'blue', tint: '#f8f8f8', line: '#101010'})
 
           var bgrd = this.bgrd = elem.rect(x, y, w, h).attrs({fill: theme.tint})
-          var tbar = this.tbar = elem.label(dims.midX, m, title).attrs({'font-weight': 500})
-          var line = this.line = elem.border(0, 0, .1, 0).attrs({fill: theme.line})
 
           if (left) {
             var lbtn = this.lbtn = elem.button(function () { left.action() })
@@ -197,6 +195,9 @@
             rbtn.label(dims.right - 6, m, right.label, 1).attrs({fill: theme.link})
             rbtn.rectX(b[2]).attrs({fill: theme.tint}).insert(0)
           }
+
+          var tbar = this.tbar = elem.label(dims.midX, m, title).attrs({'font-weight': 500})
+          var line = this.line = elem.border(0, 0, .1, 0).attrs({fill: theme.line})
 
           win.plugs.push({
             move: function (px) {
