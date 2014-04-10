@@ -173,7 +173,7 @@
           var dims = this.dims = Sky.box(x = d.x, y = d.y, w = d.w, h = opts.height)
           var elem = this.elem = win.chrome.g({'font-size': 10})
 
-          var m = dims.midY;
+          var m = dims.midY, b = dims.part([.3, .4, .3], true)
           var state = win.state, nav = state.nav, page = nav.pages[state.tag], prev = state.prev;
           var title = opts.title || page.title, left = opts.left, right = opts.right;
           var theme = this.theme({link: 'blue', tint: '#f8f8f8', line: '#101010'})
@@ -185,17 +185,17 @@
           if (left) {
             var lbtn = this.lbtn = elem.button(function () { left.action() })
             lbtn.label(x + 6, m, left.label, -1).attrs({fill: theme.link})
-            lbtn.rectX().attrs({fill: theme.tint}).insert(0)
+            lbtn.rectX(b[0]).attrs({fill: theme.tint}).insert(0)
           } else if (prev) {
             var back = this.back = elem.button(function () { nav.action('back')(state.data) })
             back.chevron(x + 6, m, -5).attrs({stroke: theme.link})
             back.label(x + 12, m, nav.pages[prev.tag].title, -1).attrs({fill: theme.link})
-            back.rectX().attrs({fill: theme.tint}).insert(0)
+            back.rectX(b[0]).attrs({fill: theme.tint}).insert(0)
           }
           if (right) {
             var rbtn = this.rbtn = elem.button(function () { right.action() })
             rbtn.label(dims.right - 6, m, right.label, 1).attrs({fill: theme.link})
-            rbtn.rectX().attrs({fill: theme.tint}).insert(0)
+            rbtn.rectX(b[2]).attrs({fill: theme.tint}).insert(0)
           }
 
           win.plugs.push({
