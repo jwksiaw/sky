@@ -2,8 +2,8 @@
   var P = Sky.path, U = Sky.util, up = Sun.up, Cage = Sun.Cage;
 
   up(Sky.SVGElem.prototype, {
-    button: function (fun, opts) {
-      return this.g({cursor: 'pointer'}).tap(fun, opts)
+    button: function (fun, opts, jack) {
+      return this.g({cursor: 'pointer'}).tap(fun, opts, jack)
     },
 
     chevron: function (cx, cy, w, h) {
@@ -24,11 +24,7 @@
     segue: function (fn) {
       var self = this;
       return function () {
-        var orb = fn.apply(self, arguments)
-        Orb.grab(orb)
-        Orb.move(orb, 100)
-        Orb.free(orb)
-        return orb;
+        return Orb.drag(fn.apply(self, arguments), 'move', [100])
       }
     },
 
@@ -174,33 +170,31 @@
           var elem = this.elem = win.chrome.g({'font-size': 10})
           var thumb = 10;
 
-          var m = dims.midY;
+          var m = dims.midY, b = dims.part([.3, .4, .3], true)
           var state = win.state, nav = state.nav, page = nav.pages[state.tag], prev = state.prev;
           var title = opts.title || page.title, left = opts.left, right = opts.right;
           var theme = this.theme({link: 'blue', tint: '#f8f8f8', line: '#101010'})
 
           var bgrd = this.bgrd = elem.rect(x, y, w, h).attrs({fill: theme.tint})
-          var tbar = this.tbar = elem.label(dims.midX, m, title).attrs({'font-weight': 500})
-          var line = this.line = elem.border(0, 0, .1, 0).attrs({fill: theme.line})
 
           if (left) {
             var lbtn = this.lbtn = elem.button(function () { left.action() })
             lbtn.label(x + 6, m, left.label, -1).attrs({fill: theme.link})
-            var wl = lbtn.bbox().right + thumb;
-            lbtn.rect(x, y, wl - x, dims.height - 2).attrs({fill: theme.tint}).insert(0)
+            lbtn.rectX(b[0]).attrs({fill: theme.tint}).insert(0)
           } else if (prev) {
             var back = this.back = elem.button(function () { nav.action('back')(state.data) })
             back.chevron(x + 6, m, -5).attrs({stroke: theme.link})
             back.label(x + 12, m, nav.pages[prev.tag].title, -1).attrs({fill: theme.link})
-            var wb = back.bbox().right + thumb;
-            back.rect(x, y, wb - x, dims.height - 2).attrs({fill: theme.tint}).insert(0)
+            back.rectX(b[0]).attrs({fill: theme.tint}).insert(0)
           }
           if (right) {
             var rbtn = this.rbtn = elem.button(function () { right.action() })
             rbtn.label(dims.right - 6, m, right.label, 1).attrs({fill: theme.link})
-            var xr = rbtn.bbox().left - thumb;
-            rbtn.rect(xr, y, w - xr, dims.height - 2).attrs({fill: theme.tint}).insert(0)
+            rbtn.rectX(b[2]).attrs({fill: theme.tint}).insert(0)
           }
+
+          var tbar = this.tbar = elem.label(dims.midX, m, title).attrs({'font-weight': 500})
+          var line = this.line = elem.border(0, 0, .1, 0).attrs({fill: theme.line})
 
           win.plugs.push({
             move: function (px) {
