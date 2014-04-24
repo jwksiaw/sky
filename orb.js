@@ -362,10 +362,15 @@
 
     loop: Orb.type(function Loop(elem, jack, opts) {
       var opts = up({}, opts)
-      var bbox = opts.bbox || {}, wrap = opts.wrap || function () {}
-      var xmin = def(bbox.x, -Inf), xmax = def(bbox.x + bbox.width, Inf)
-      var ymin = def(bbox.y, -Inf), ymax = def(bbox.y + bbox.height, Inf)
-      var wide = xmax - xmin, high = ymax - ymin;
+      var wrap = opts.wrap || function () {}
+      var xmin, xmax, ymin, ymax, wide, high;
+      var setBBox = this.setBBox = function (bbox) {
+        var b = bbox || {}
+        xmin = def(b.x, -Inf); xmax = def(b.x + b.width, Inf)
+        ymin = def(b.y, -Inf); ymax = def(b.y + b.height, Inf)
+        wide = xmax - xmin; high = ymax - ymin;
+      }
+      setBBox(opts.bbox)
 
       this.elem = elem;
       this.jack = jack;

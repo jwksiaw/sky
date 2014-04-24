@@ -10,6 +10,7 @@
   }
   var int = function (x) { return parseInt(x, 10) }
   var sgn = function (x) { return x < 0 ? -1 : 1 }
+  var add = function (x, y) { return x + y }
   var max = function (x, y) { return x > y ? x : y }
   var min = function (x, y) { return x < y ? x : y }
   var mod = function (x, y) {
@@ -45,6 +46,7 @@
     cls: cls,
     int: int,
     sgn: sgn,
+    add: add,
     max: max,
     min: min,
     mod: mod,
@@ -58,6 +60,16 @@
       if (n && text.length > n + 3)
         return text.substr(0, n) + '\u2026';
       return text;
+    },
+    count: function (fun, acc, opt) {
+      var o = up({start: 0, step: 1, stop: isFinite(opt) ? opt : undefined}, opt)
+      var f = o.start + o.step >= o.start;
+      for (var i = o.start; f ? i < o.stop : i > o.stop; i += o.step)
+        acc = fun(acc, i, o)
+      return acc;
+    },
+    range: function (opt) {
+      return Sun.count(L.append, [], opt)
     },
     fold: function (fun, acc, obj) {
       if (obj && obj.reduce)
