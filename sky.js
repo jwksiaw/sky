@@ -155,9 +155,10 @@
     },
     slice: function (ps, hzn) {
       var d = hzn ? this.w : this.h, ps = [].concat(ps)
+      var f = 1 - ps.reduce(function (s, p) { return isFinite(p) ? s + p : s }, 0) / d;
       return this.part(ps.map(function (p) {
         var pct = typeof(p) == 'string' && p[p.length - 1] == '%';
-        return pct ? parseFloat(p.slice(0, -1)) / 100 : p / d;
+        return pct ? f * parseFloat(p.slice(0, -1)) / 100 : p / d;
       }), hzn)
     },
     part: function (ps, hzn) {
