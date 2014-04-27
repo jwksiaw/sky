@@ -307,6 +307,10 @@
           fun.apply(this, arguments)
       })
     },
+    bind: function (name) {
+      var fun = this[name]
+      return fun.bind.apply(fun, [this].concat([].slice.call(arguments, 1)))
+    },
     each: function (sel, fun, acc) {
       return [].reduce.call(this.node.querySelectorAll(sel), fun, acc) || this;
     },
@@ -316,6 +320,12 @@
     },
     doc: function () {
       return this.node.ownerDocument ? new Elem(this.node.ownerDocument) : this;
+    },
+    attached: function (o) {
+      return this.root() == (o ? o.root() : this.doc().node)
+    },
+    detached: function (o) {
+      return !this.attached(o)
     },
     txt: function (text) {
       return this.props({textContent: text})
