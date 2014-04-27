@@ -33,10 +33,13 @@
       return fn.bind.apply(fn, [this].concat([].slice.call(arguments, 1)))
     },
 
+    draw: function (tag, win) {
+      return this.pages[tag].draw(win) || win;
+    },
+
     load: function (state, opts) {
       var state = up(state || this.state, {nav: this})
-      var win = this.frame.window(state, opts)
-      return this.pages[state.tag].draw(win) || win;
+      return this.draw(state.tag, this.frame.window(state, opts))
     },
 
     reload: function (data) {
@@ -162,6 +165,11 @@
           frame.change('top', this)
         xfer.call(this, percent = 0)
       }, {
+        redraw: function () {
+          this.chrome.clear()
+          this.content.clear()
+          this.state.nav.draw(this.state.tag, this)
+        },
         navbar: otype(function NavBar(win, opts) {
           var x, y, w, h, d = win.dims;
           var parent = this.parent = win;
