@@ -37,6 +37,10 @@
       return this.pages[tag].draw(win) || win;
     },
 
+    redraw: function (win) {
+      return this.draw(win.state.tag, win.reset())
+    },
+
     load: function (state, opts) {
       var state = up(state || this.state, {nav: this})
       return this.draw(state.tag, this.frame.window(state, opts))
@@ -165,10 +169,11 @@
           frame.change('top', this)
         xfer.call(this, percent = 0)
       }, {
-        redraw: function () {
+        reset: function () {
           this.chrome.clear()
           this.content.clear()
-          this.state.nav.draw(this.state.tag, this)
+          this.plugs.splice(0, -1)
+          return this;
         },
         navbar: otype(function NavBar(win, opts) {
           var x, y, w, h, d = win.dims;
