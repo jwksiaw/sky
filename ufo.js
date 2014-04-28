@@ -87,7 +87,7 @@
       var opts = this.opts = up({}, opts)
       var dims = this.dims = Sky.box(0, 0, 200, 200 / opts.aspectRatio)
       var elem = this.elem = new Sky.svg({viewBox: dims}).addTo(root)
-      this.on('top', function (n, o) { o && o != n && o.elem.remove() })
+      this.on('top', function (n, o) { o && o != n && o.unload() })
     }, new Cage, {
       window: otype(function Window(frame, state, opts) {
         var parent = this.parent = frame;
@@ -113,7 +113,7 @@
             } else {
               if (percent > 0)
                 return this.move(-percent)
-              elem.remove()
+              self.unload()
             }
           }
         })
@@ -173,6 +173,11 @@
           this.chrome.clear()
           this.content.clear()
           this.plugs.splice(0, -1)
+          return this;
+        },
+        unload: function () {
+          this.elem.remove()
+          this.unloaded = true;
           return this;
         },
         navbar: otype(function NavBar(win, opts) {
