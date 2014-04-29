@@ -52,6 +52,20 @@
                 P.line(ix, iy, ix, iy + ih) + P('h', iw) + P('v', -ih) + P('h', -iw))
       }
     },
+    corner: function (x1, y1, x2, y2, rx, ry, vh, iv, open) {
+      var open = open || P.M;
+      var rx = def(rx, 0), ry = def(ry, rx), iv = def(iv, 0)
+      var sx = x1 < x2 ? 1 : -1, sy = y1 < y2 ? 1 : -1;
+      var dx = sx * rx, dy = sy * ry;
+      var sd = vh ^ iv ? +(sx * sy < 0) : +(sx * sy > 0)
+      if (vh) {
+        var cx = x1 + dx, cy = y2 - dy;
+        return open([x1, y1]) + P('v', cy - y1) + P('a', rx, ry, 0, 0, sd, dx, dy) + P('h', x2 - cx)
+      } else {
+        var cx = x2 - dx, cy = y1 + dy;
+        return open([x1, y1]) + P('h', cx - x1) + P('a', rx, ry, 0, 0, sd, dx, dy) + P('v', y2 - cy)
+      }
+    },
     chevron: function (cx, cy, w, h, open) {
       var open = open || P.M;
       var h = def(h, 2 * w), g = h / 2;
@@ -71,10 +85,10 @@
       var fx = cx + rx * trig.cos(off + len), fy = cy + ry * trig.sin(off + len)
       return (open([ix, iy]) +
               P('A',
-                   rx, ry, 0,
-                   Math.abs(len) > 180 ? 1 : 0,
-                   len > 0 ? 1 : 0,
-                   fx, fy))
+                rx, ry, 0,
+                Math.abs(len) > 180 ? 1 : 0,
+                len > 0 ? 1 : 0,
+                fx, fy))
     },
     oval: function (cx, cy, rx, ry, open) {
       var ry = def(ry, rx)
