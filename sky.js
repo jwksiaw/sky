@@ -183,6 +183,11 @@
       with (this)
         return new Box({x: def(o.x, x), y: def(o.y, y), w: def(ow, w), h: def(oh, h)})
     },
+    equals: function (o) {
+      var o = o || {}, ow = def(o.w, o.width), oh = def(o.h, o.height)
+      with (this)
+        return x == def(o.x, 0) && y == def(o.y, 0) && w == def(ow, 0) && h == def(oh, 0)
+    },
     toString: function () { with (this) return x + ',' + y + ',' + w + ',' + h }
   }
 
