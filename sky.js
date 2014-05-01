@@ -465,6 +465,9 @@
     xywh: function (x, y, w, h) {
       return this.attrs({x: x, y: y, width: w, height: h})
     },
+    resize: function (box) {
+      return this.xywh(box.x, box.y, box.w, box.h)
+    },
     point: function (x, y) {
       var p = this.enc().node.createSVGPoint()
       p.x = x;
