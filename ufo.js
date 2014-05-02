@@ -33,10 +33,17 @@
       return fn.bind.apply(fn, [this].concat([].slice.call(arguments, 1)))
     },
 
+    draw: function (tag, win) {
+      return this.pages[tag].draw(win) || win;
+    },
+
+    redraw: function (win) {
+      return this.draw(win.state.tag, win.reset())
+    },
+
     load: function (state, opts) {
       var state = up(state || this.state, {nav: this})
-      var win = this.frame.window(state, opts)
-      return this.pages[state.tag].draw(win) || win;
+      return this.draw(state.tag, this.frame.window(state, opts))
     },
 
     reload: function (data) {
@@ -87,8 +94,8 @@
         var opts = this.opts = up({}, opts)
         var dims = this.dims = frame.dims;
         var elem = this.elem = frame.elem.g()
-        var chrome = this.chrome = elem.g()
         var content = this.content = elem.g()
+        var chrome = this.chrome = elem.g()
 
         var self = this;
         var xfer, percent;
@@ -118,7 +125,7 @@
         case 'next':
           xfer = function (p) {
             if (frame.top) {
-              frame.top.chrome.style({opacity: (1 - p / 100)})
+              frame.top.chrome.style({opacity: 1 - p / 100})
               Orb.move(frame.top.plugs, -p / 100)
             }
             chrome.style({opacity: p / 100})
@@ -162,6 +169,21 @@
           frame.change('top', this)
         xfer.call(this, percent = 0)
       }, {
+        reset: function () {
+          this.chrome.clear()
+          this.content.clear()
+          this.plugs.splice(0, -1)
+          return this;
+        },
+        background: otype(function Background(win, opts) {
+          var parent = this.parent = win;
+          var opts = this.opts = up({}, opts)
+          var dims = this.dims = win.dims;
+          var elem = this.elem = win.content.g()
+
+          var theme = this.theme({back: '#f8f8f8'})
+          var bgrd = elem.rectX(dims).attrs({fill: theme.back})
+        }),
         navbar: otype(function NavBar(win, opts) {
           var x, y, w, h, d = win.dims;
           var parent = this.parent = win;

@@ -95,7 +95,7 @@
   Sun.Cage = function Cage(obj, opt) {
     this.__opt__ = up({sep: /\s+/}, opt)
     this.__obj__ = obj || this;
-    this.__fns__ = {};
+    this.__fns__ = {}
   }
   up(Sun.Cage.prototype, {
     change: function (k, v) {
@@ -119,7 +119,7 @@
       keys.split(sep).map(function (k) {
         var i = (fns[k] || []).indexOf(fun)
         if (i >= 0)
-          fns[k].splice(i, 1)
+          delete fns[k][i]
       })
       return this;
     },

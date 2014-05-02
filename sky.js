@@ -52,6 +52,20 @@
                 P.line(ix, iy, ix, iy + ih) + P('h', iw) + P('v', -ih) + P('h', -iw))
       }
     },
+    corner: function (x1, y1, x2, y2, rx, ry, vh, iv, open) {
+      var open = open || P.M;
+      var rx = def(rx, 0), ry = def(ry, rx), iv = def(iv, 0)
+      var sx = x1 < x2 ? 1 : -1, sy = y1 < y2 ? 1 : -1;
+      var dx = sx * rx, dy = sy * ry;
+      var sd = vh ^ iv ? +(sx * sy < 0) : +(sx * sy > 0)
+      if (vh) {
+        var cx = x1 + dx, cy = y2 - dy;
+        return open([x1, y1]) + P('v', cy - y1) + P('a', rx, ry, 0, 0, sd, dx, dy) + P('h', x2 - cx)
+      } else {
+        var cx = x2 - dx, cy = y1 + dy;
+        return open([x1, y1]) + P('h', cx - x1) + P('a', rx, ry, 0, 0, sd, dx, dy) + P('v', y2 - cy)
+      }
+    },
     chevron: function (cx, cy, w, h, open) {
       var open = open || P.M;
       var h = def(h, 2 * w), g = h / 2;
@@ -71,10 +85,10 @@
       var fx = cx + rx * trig.cos(off + len), fy = cy + ry * trig.sin(off + len)
       return (open([ix, iy]) +
               P('A',
-                   rx, ry, 0,
-                   Math.abs(len) > 180 ? 1 : 0,
-                   len > 0 ? 1 : 0,
-                   fx, fy))
+                rx, ry, 0,
+                Math.abs(len) > 180 ? 1 : 0,
+                len > 0 ? 1 : 0,
+                fx, fy))
     },
     oval: function (cx, cy, rx, ry, open) {
       var ry = def(ry, rx)
@@ -155,9 +169,10 @@
     },
     slice: function (ps, hzn) {
       var d = hzn ? this.w : this.h, ps = [].concat(ps)
+      var f = 1 - ps.reduce(function (s, p) { return isFinite(p) ? s + p : s }, 0) / d;
       return this.part(ps.map(function (p) {
         var pct = typeof(p) == 'string' && p[p.length - 1] == '%';
-        return pct ? parseFloat(p.slice(0, -1)) / 100 : p / d;
+        return pct ? f * parseFloat(p.slice(0, -1)) / 100 : p / d;
       }), hzn)
     },
     part: function (ps, hzn) {
@@ -181,6 +196,11 @@
       var o = o || {}, ow = def(o.w, o.width), oh = def(o.h, o.height)
       with (this)
         return new Box({x: def(o.x, x), y: def(o.y, y), w: def(ow, w), h: def(oh, h)})
+    },
+    equals: function (o) {
+      var o = o || {}, ow = def(o.w, o.width), oh = def(o.h, o.height)
+      with (this)
+        return x == def(o.x, 0) && y == def(o.y, 0) && w == def(ow, 0) && h == def(oh, 0)
     },
     toString: function () { with (this) return x + ',' + y + ',' + w + ',' + h }
   }
@@ -306,6 +326,10 @@
           fun.apply(this, arguments)
       })
     },
+    bind: function (name) {
+      var fun = this[name]
+      return fun.bind.apply(fun, [this].concat([].slice.call(arguments, 1)))
+    },
     each: function (sel, fun, acc) {
       return [].reduce.call(this.node.querySelectorAll(sel), fun, acc) || this;
     },
@@ -315,6 +339,12 @@
     },
     doc: function () {
       return this.node.ownerDocument ? new Elem(this.node.ownerDocument) : this;
+    },
+    attached: function (o) {
+      return this.root() == (o ? o.root() : this.doc().node)
+    },
+    detached: function (o) {
+      return !this.attached(o)
     },
     txt: function (text) {
       return this.props({textContent: text})
@@ -434,6 +464,9 @@
     },
     xywh: function (x, y, w, h) {
       return this.attrs({x: x, y: y, width: w, height: h})
+    },
+    resize: function (box) {
+      return this.xywh(box.x, box.y, box.w, box.h)
     },
     point: function (x, y) {
       var p = this.enc().node.createSVGPoint()
